@@ -134,15 +134,23 @@ def cross_reference(root, file, tag):
                     line = before + "<opi_file>" + ".." + os.sep + ".." + os.sep + path + "</opi_file>" + after + "\n"
                 sys.stderr.write("converted to: " + line)
         print(line, end="")
+    print("Updated.")
 
 
 # Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
 def convert_adls(ad_dir, opi_dir):
+    css_dict = {css_path : "",
+                "-nosplash" : "",
+                "-application" : "",
+                "org.csstudio.opibuilder.adl2boy.application" : "",
+    }
+    file2plug =  {
+        # converted opi filename : [plugin name, plugin version, plugin key]
+    }
     for root, dirs, files in os.walk(ad_dir):
         for file in files:
             if file.endswith(".adl"):
                 print(file)
-                skip = False
                 plugin = ""
                 ver = ""
                 tag = ""
@@ -174,28 +182,32 @@ def convert_adls(ad_dir, opi_dir):
                     # if filename_converted.opi already exists in the adl folder, it has been converted but
                     # not moved
                     if os.path.isfile(os.path.join(root,file)[:-4] + "_converted.opi"):
-                        skip = True
-                    try:
-                        if skip is False:
-                            # use CS Studio adl2boy to convert adl to opi; creates a new file <filename>.opi
-                            run([css_path, "-nosplash", "-application", "org.csstudio.opibuilder.adl2boy.application",
-                                 os.path.join(root, file)])
-                            opi = file[:-4] + ".opi"
-                            # rename new opi to <filename>_converted.opi to avoid clashing name
-                            os.rename(os.path.join(root,opi), os.path.join(root,opi)[:-4] + "_converted.opi")
-                        opi = opi[:-4] + "_converted.opi"
-                        # print(opi)
-                        if not os.path.exists(newPath):
-                            os.makedirs(newPath)
-                        newPath = newPath + os.sep + opi
-                        os.rename(os.path.join(root, opi), newPath)
-                        if tag is not None:
-                            cross_reference(opi_directory + os.sep + plugin + os.sep + ver, opi, tag)
-                    except OSError:
-                        print("Error running CS Studio executable. It may not have the adl2boy feature.")
-                        return
-                else:
-                    print("Could not identify which plugin the file belongs to.")
+                        continue
+                    else:
+                        css_dict[os.path.join(root, file)] = [plugin, ver]
+                        if plugin != "ADCore":
+                            file2plug[file[:-4] + "_converted.opi"] = [plugin, ver, tag]
+    if len(css_dict) > 4:
+        try:
+            print("Executing CS Studio...")
+            run(list(css_dict.keys()))
+            for file in list(css_dict.keys())[4:]:
+                # print(file)
+                opi = file[:-4] + ".opi"
+                # rename new opi to <filename>_converted.opi to avoid clashing name
+                os.rename(opi, opi[:-4] + "_converted.opi")
+                opi = opi[:-4] + "_converted.opi"
+                # print(opi)
+                newPath = opi_dir + os.sep + css_dict[file][0] + os.sep + css_dict[file][1]
+                if not os.path.exists(newPath):
+                    os.makedirs(newPath)
+                newPath = newPath + os.sep + os.path.basename(opi)
+                os.rename(opi, newPath)
+            for p in file2plug.keys():
+                cross_reference(opi_dir + os.sep + file2plug[p][0] + os.sep + file2plug[p][1], p, file2plug[p][2])
+        except OSError:
+            print("Could not run CS Studio. It may not have the adl2boy feature.")
+
 
 
 # prompt the user to register a plugin into the search dictionary, using "suggestion" (if not None)
@@ -360,11 +372,11 @@ else:
         plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 organize(opi_directory)
-print("Directory successfully updated.\n")
-
 if css_path != "":
     print("Converting adl files...")
     convert_adls(ad_directory, opi_directory)
+
+print("\nDirectory successfully updated.\n")
 
 if len(unidentifiedFiles) != 0:
     print("Unidentified files:")
