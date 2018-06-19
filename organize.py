@@ -173,20 +173,19 @@ def convert_adls(ad_dir, opi_dir):
                 # (to avoid executing CS Studio too much)
                 if plugin != "" and ver != "":
                     newPath = opi_dir + os.sep + plugin + os.sep + ver
-                    opi = file[:-4] + "_converted.opi"
-                    # if filename_converted.opi already exists in the OPI folder, it has been converted and moved
+                    opi = file[:-4] + ".opi"
+                    # if <filename>.opi already exists in the OPI folder, it has been converted and moved
                     # already (adl files are not removed after being converted)
                     if os.path.isfile(newPath + os.sep + opi):
                         print("File has already been converted.")
                         continue
-                    # if filename_converted.opi already exists in the adl folder, it has been converted but
-                    # not moved
-                    if os.path.isfile(os.path.join(root,file)[:-4] + "_converted.opi"):
-                        continue
-                    else:
-                        css_dict[os.path.join(root, file)] = [plugin, ver]
-                        if plugin != "ADCore":
-                            file2plug[file[:-4] + "_converted.opi"] = [plugin, ver, tag]
+                    # if <filename>.opi already exists in the adl folder, it has been converted but
+                    # not moved, so it is deleted and converted/moved again for simplicity
+                    if os.path.isfile(os.path.join(root,file)[:-4] + ".opi"):
+                        os.remove(os.path.join(root,file)[:-4] + ".opi")
+                    css_dict[os.path.join(root, file)] = [plugin, ver]
+                    if plugin != "ADCore":
+                        file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
     if len(css_dict) > 4:
         try:
             print("Executing CS Studio...")
@@ -194,9 +193,6 @@ def convert_adls(ad_dir, opi_dir):
             for file in list(css_dict.keys())[4:]:
                 # print(file)
                 opi = file[:-4] + ".opi"
-                # rename new opi to <filename>_converted.opi to avoid clashing name
-                os.rename(opi, opi[:-4] + "_converted.opi")
-                opi = opi[:-4] + "_converted.opi"
                 # print(opi)
                 newPath = opi_dir + os.sep + css_dict[file][0] + os.sep + css_dict[file][1]
                 if not os.path.exists(newPath):
@@ -207,7 +203,6 @@ def convert_adls(ad_dir, opi_dir):
                 cross_reference(opi_dir + os.sep + file2plug[p][0] + os.sep + file2plug[p][1], p, file2plug[p][2])
         except OSError:
             print("Could not run CS Studio. It may not have the adl2boy feature.")
-
 
 
 # prompt the user to register a plugin into the search dictionary, using "suggestion" (if not None)
