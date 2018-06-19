@@ -32,10 +32,9 @@ unidentifiedFiles = []
 ADCore_ver = ""
 
 # Default constants to circumvent asking for user input. Set to None to ask for input
-DEFAULT_OPI_DIRECTORY = "C:\\Users\\mikes\\Documents\\cs-studio-nsls2-4.5.1-win32.win32.x86_64\\cs-studio\\workspace" \
-                        "\\cs-studio-xf\\ADet\\TESTING_2"
+DEFAULT_OPI_DIRECTORY = None
 
-DEFAULT_AD_DIRECTORY = "C:\\Users\\mikes\\Documents\\AreaDetector"
+DEFAULT_AD_DIRECTORY = None
 
 
 # given a flat directory of Area Detector OPIs, convert it to a hierarchical directory that
