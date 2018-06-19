@@ -11,6 +11,7 @@ import sys
 from urllib.error import URLError
 from urllib.request import urlopen
 from subprocess import run
+from shutil import copyfile
 
 # example dict of some Area Detector plugins
 # dict matches filename substring with plugin name and version
@@ -42,53 +43,62 @@ DEFAULT_AD_DIRECTORY = None
 
 DEFAULT_CSS_DIRECTORY = None
 
-# given a flat directory of Area Detector OPIs, convert it to a hierarchical directory that
+# given a directory of Area Detector files, construct a hierarchical directory that
 # groups OPIs into their respective plugins and versions
-def organize(directory):
+def organize(ad_dir, opi_dir):
     ver = ""
     tag = ""
     dirName = ""
-    for file in os.listdir(directory):
-        if os.path.isfile(os.path.join(directory, file)) and file.endswith('.opi'):
-            # check if the opi file matches one of the
-            # plugins being searched for
-            isPlugin = False
-            for plugin in plugin_dict.keys():
-                if plugin.casefold() in file.casefold():
-                    isPlugin = True
-                    print("Found plugin file: " + file)
-                    dirName = plugin_dict.get(plugin)[0]
-                    tag = plugin
-                    ver = plugin_dict.get(plugin)[1]
-                    print("plugin name: " + dirName)
-                    break
-            # else, it is either a part of ADCore or unidentifiable
-            if isPlugin is False:
-                if "AD" in file or "ND" in file:
-                    dirName = "ADCore"
-                    ver = ADCore_ver
-                    print("Found ADCore file: " + file)
-                else:
-                    unidentifiedFiles.append(file)
-                    continue
-            # construct new location of organized file
-            newPath = directory + os.sep + dirName + os.sep + ver
-            oldPath = os.path.join(directory, file)
-            print("current path: " + oldPath)
-            if not os.path.exists(newPath):  # create new folder if it doesn't exist
-                print("making new folder...")
-                os.makedirs(newPath)
-            newPath = newPath + os.sep + file
-            if oldPath != newPath:  # if the file isn't already in its folder, move it
-                print("new path: " + newPath)
-                if isPlugin is True:
-                    cross_reference(directory, file, tag)
-                    print("References updated.")
-                os.rename(oldPath, newPath)
-                print("File moved.")
-            else:
-                print("file is already organized.")
-            # print("\n")
+    old = False
+    for root, dirs, files in os.walk(ad_dir):
+        for file in files:
+            if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
+                old = False
+                if opi_dir in os.path.join(root, file):
+                    old = True
+                # check if the opi file matches one of the
+                # plugins being searched for
+                isPlugin = False
+                for plugin in plugin_dict.keys():
+                    if plugin.casefold() in file.casefold():
+                        isPlugin = True
+                        # print("Found plugin file: " + file)
+                        dirName = plugin_dict.get(plugin)[0]
+                        tag = plugin
+                        ver = plugin_dict.get(plugin)[1]
+                        # print("plugin name: " + dirName)
+                        break
+                # else, it is either a part of ADCore or unidentifiable
+                if isPlugin is False:
+                    if "AD" in file or "ND" in file:
+                        dirName = "ADCore"
+                        ver = ADCore_ver
+                        # print("Found ADCore file: " + file)
+                    else:
+                        unidentifiedFiles.append(file)
+                        continue
+                # construct new location of organized file
+                newPath = opi_directory + os.sep + dirName + os.sep + ver
+                oldPath = os.path.join(root, file)
+                # print("current path: " + oldPath)
+                if not os.path.exists(newPath):  # create new folder if it doesn't exist
+                    # print("making new folder...")
+                    os.makedirs(newPath)
+                newPath = newPath + os.sep + file
+                if oldPath != newPath and not os.path.isfile(newPath):  # if the file isn't already in its folder, move it
+                    # print("new path: " + newPath)
+                    if not old:
+                        print("File copied: " + file)
+                        copyfile(oldPath, newPath)
+                    else:
+                        print("File moved: " + file)
+                        copyfile(oldPath, newPath)
+                    if isPlugin is True:
+                        cross_reference(opi_directory + os.sep + dirName + os.sep + ver, file, tag)
+                    if opi_directory in oldPath:
+                        oldFiles.append(oldPath)
+                if old:
+                    os.remove(oldPath)
 
 
 # given an OPI file moved by organize(), update its cross-references. The "tag" argument is the identifying
@@ -134,7 +144,7 @@ def cross_reference(root, file, tag):
                     line = before + "<opi_file>" + ".." + os.sep + ".." + os.sep + path + "</opi_file>" + after + "\n"
                 sys.stderr.write("converted to: " + line)
         print(line, end="")
-    print("Updated.")
+    print("References updated.")
 
 
 # Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
@@ -240,7 +250,7 @@ if DEFAULT_OPI_DIRECTORY is not None:
 else:
     opi_directory = ""
     while not os.path.isdir(opi_directory):
-        opi_directory = input("Enter path to directory containing OPIs to organize: ")
+        opi_directory = input("Enter path to target directory containing OPIs to organize: ")
 
 if DEFAULT_AD_DIRECTORY is not None:
     ad_directory = DEFAULT_AD_DIRECTORY
@@ -366,7 +376,7 @@ else:
         print(plugin + " version " + version + " added to search, identifying with \"" + substr + "\".")
         plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
-organize(opi_directory)
+organize(ad_directory, opi_directory)
 if css_path != "":
     print("Converting adl files...")
     convert_adls(ad_directory, opi_directory)
