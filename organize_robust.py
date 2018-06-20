@@ -194,10 +194,12 @@ def cross_reference(root, file, tag):
 
 # Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
 def convert_adls(ad_dir, opi_dir):
+    # arguments used in executing CS Studio
     css_dict = {# css_path : "",
                 "-nosplash" : "",
                 "-application" : "",
                 "org.csstudio.opibuilder.adl2boy.application" : "",
+                # /path/to/adl/file : [plugin name, plugin version]
     }
     file2plug =  {
         # converted opi filename : [plugin name, plugin version, plugin key]
@@ -302,12 +304,13 @@ def search_directory(directory, query):
 ########################### MAIN ###########################
 response = ""
 
+# get directory paths
 if DEFAULT_OPI_DIRECTORY is not None:
     opi_directory = DEFAULT_OPI_DIRECTORY
 else:
     opi_directory = ""
     while not os.path.isdir(opi_directory):
-        opi_directory = input("Enter path to target directory containing OPIs to organize: ")
+        opi_directory = input("Enter path to target OPI directory: ")
 
 if DEFAULT_AD_DIRECTORY is not None:
     ad_directory = DEFAULT_AD_DIRECTORY
@@ -334,9 +337,10 @@ except IOError:
     print("Could not detect ADCore version.")
     ADCore_ver = input("Enter ADCore version: ")
 
+# ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
 print("If installed, CS Studio can be used to convert MEDM adl files into BOY opi files.")
 while response != 'y' and response != 'n':
-    response = input("Use this feature? (y/n): ").lower()
+    response = input("Use this feature? (y/n) ").lower()
 if response == 'y':
     if DEFAULT_CSS_DIRECTORY is not None:
         css_path = DEFAULT_CSS_DIRECTORY
@@ -344,6 +348,8 @@ if response == 'y':
         while not os.path.isfile(css_path):
             css_path = input("Enter path to CSS executable: ")
 
+# search the github repository for AreaDetector plugins; compare against the user's AreaDetector directory
+# and prompt the user to confirm the existence of any matches found (as well as the version if it can not be found)
 matches = []
 currPage = 0
 error = False
@@ -389,7 +395,6 @@ while len(matches) != 0 or start is True:
                             break
                 if found is False:
                     while response != 'y' and response != 'n':
-                        print("POOP")
                         response = input("Detected " + match + " but could not find version. Register and "
                                    "confirm version? (y/n) ").lower()
                     if response == 'y':
@@ -411,6 +416,8 @@ while len(matches) != 0 or start is True:
                         else:
                             plugin_dict[match] = [match, ver]
 
+# after comparing user's local directory against the github repo, ask the user if they want to manually register any
+# more plugins into the search
 if error is False:
     print("Done detecting plugins.")
     choice = ""
@@ -447,6 +454,8 @@ if error is False:
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
                 register_plugin(query, None)
+
+# if the github site could not be connected to for some reason, the user must input all their plugins manually
 else:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
@@ -457,6 +466,7 @@ else:
         print(plugin + " version " + version + " added to search, identifying with \"" + substr + "\".")
         plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
+# do the organizing
 organize(ad_directory, opi_directory)
 if css_path != "":
     print("Converting adl files...")
@@ -464,6 +474,7 @@ if css_path != "":
 
 print("\nDirectory successfully updated.\n")
 
+# print the path to any unidentified files that were found (and thus left untouched)
 if len(unidentifiedFiles_dict) != 0:
     print("Unidentified files:")
     for file in unidentifiedFiles_dict.keys():
