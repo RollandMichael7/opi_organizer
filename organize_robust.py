@@ -52,7 +52,6 @@ def organize(ad_dir, opi_dir):
     ver = ""
     tag = ""
     dirName = ""
-    old = False
     for root, dirs, files in os.walk(ad_dir):
         for file in files:
             if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
@@ -69,14 +68,14 @@ def organize(ad_dir, opi_dir):
                         dirName = plugin_dict.get(plugin)[0]
                         tag = plugin
                         ver = plugin_dict.get(plugin)[1]
-                        # print("plugin name: " + dirName)
+                        print("Found " + dirName + " file: " + file + " (" + os.path.join(root, file) + ")")
                         break
                 # else, it is either a part of ADCore or unidentifiable
                 if isPlugin is False:
                     if "AD" in file or "ND" in file:
                         dirName = "ADCore"
                         ver = ADCore_ver
-                        # print("Found ADCore file: " + file)
+                        print("Found ADCore file: " + file + " (" + os.path.join(root, file) + ")")
                     else:
                         unidentifiedFiles_dict[file] = os.path.join(root, file)
                         continue
@@ -90,14 +89,17 @@ def organize(ad_dir, opi_dir):
                 newPath = newPath + os.sep + file
                 if oldPath != newPath and not os.path.isfile(newPath):  # if the file isn't already in its folder, move it
                     # print("new path: " + newPath)
+                    # print("old path: " + oldPath)
                     if not old:
-                        print("File copied: " + file)
+                        print("File copied")
                         copyfile(oldPath, newPath)
                     else:
-                        print("File moved: " + file)
-                        copyfile(oldPath, newPath)
+                        print("File moved")
+                        os.rename(oldPath, newPath)
                     if isPlugin is True:
                         cross_reference(opi_directory + os.sep + dirName + os.sep + ver, file, tag)
+                else:
+                    print("File is already organized.")
     # do same thing for opi directory
     directory = opi_dir
     for file in os.listdir(opi_dir):
@@ -106,29 +108,29 @@ def organize(ad_dir, opi_dir):
             for plugin in plugin_dict.keys():
                 if plugin.casefold() in file.casefold():
                     isPlugin = True
-                    print("Found plugin file: " + file)
+                    # print("Found plugin file: " + file)
                     dirName = plugin_dict.get(plugin)[0]
                     tag = plugin
                     ver = plugin_dict.get(plugin)[1]
-                    print("plugin name: " + dirName)
+                    print("Found " + dirName + " file: " + file + " (" + os.path.join(opi_dir, file) + ")")
                     break
             if isPlugin is False:
                 if "AD" in file or "ND" in file:
                     dirName = "ADCore"
                     ver = ADCore_ver
-                    print("Found ADCore file: " + file)
+                    print("Found ADCore file: " + file + " (" + os.path.join(opi_dir, file) + ")")
                 else:
                     unidentifiedFiles_dict[file] = os.path.join(opi_dir, file)
                     continue
             newPath = directory + os.sep + dirName + os.sep + ver
             oldPath = os.path.join(directory, file)
-            print("current path: " + oldPath)
+            # print("current path: " + oldPath)
             if not os.path.exists(newPath):
                 print("making new folder...")
                 os.makedirs(newPath)
             newPath = newPath + os.sep + file
             if oldPath != newPath:
-                print("new path: " + newPath)
+                # print("new path: " + newPath)
                 if isPlugin is True:
                     cross_reference(directory, file, tag)
                     print("References updated.")
@@ -141,7 +143,7 @@ def organize(ad_dir, opi_dir):
                     continue
                 print("File moved.")
             else:
-                print("file is already organized.")
+                print("File is already organized.")
 
 
 # given an OPI file moved by organize(), update its cross-references. The "tag" argument is the identifying
