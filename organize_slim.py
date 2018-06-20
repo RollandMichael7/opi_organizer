@@ -157,20 +157,20 @@ def convert_adls(ad_dir, opi_dir):
                 ver = ""
                 tag = ""
                 # identify which plugin the adl belongs to
-                if "AD" in file or "ND" in file:
-                    plugin = "ADCore"
-                    ver = ADCore_ver
-                    tag = None
-                else:
-                    for p in plugin_list:
-                        if p in os.path.join(root, file):
-                            plugin = p
-                            break
-                    for key in plugin_dict.keys():
-                        if plugin == plugin_dict[key][0]:
-                            ver = plugin_dict[key][1]
-                            tag = key
-                            break
+                for p in plugin_list:
+                    if p in os.path.join(root, file):
+                        plugin = p
+                        break
+                for key in plugin_dict.keys():
+                    if plugin == plugin_dict[key][0]:
+                        ver = plugin_dict[key][1]
+                        tag = key
+                        break
+                if plugin == "" and ver == "":
+                    if "AD" in file or "ND" in file:
+                        plugin = "ADCore"
+                        ver = ADCore_ver
+                        tag = None
                 # if it was identified, check if its already been converted previously
                 # (to avoid executing CS Studio too much)
                 if plugin != "" and ver != "":
@@ -308,11 +308,13 @@ while len(matches) != 0 or start is True:
     matches = re.findall("a href=\"/areaDetector/(.*)\" itemprop", repo)
     for match in matches:
         if match != "ADCore" and match != "areaDetector":
+            response = ""
             plugin_list.append(match)
             release_path = ad_directory + os.sep + match + os.sep + "RELEASE.md"
             try:
                 search = False
                 release = open(release_path)
+                found = False
                 for line in release:
                     if "Release Notes" in line:
                         search = True
@@ -320,6 +322,7 @@ while len(matches) != 0 or start is True:
                     if search is True:
                         version = re.search("(R\d+-\d+(?:-\d+)*)", line)
                         if version is not None:
+                            found = True
                             response = ""
                             plugin_ver = version.group(1)
                             while response != 'y' and response != 'n':
@@ -330,8 +333,29 @@ while len(matches) != 0 or start is True:
                                 else:
                                     plugin_dict[match] = [match, plugin_ver]
                             break
+                if found is False:
+                    while response != 'y' and response != 'n':
+                        print("POOP")
+                        response = input("Detected " + match + " but could not find version. Register and "
+                                   "confirm version? (y/n) ").lower()
+                    if response == 'y':
+                        ver = input("Enter version: ")
+                        if match.startswith("AD"):
+                            plugin_dict[match[2:]] = [match, ver]
+                        else:
+                            plugin_dict[match] = [match, ver]
             except IOError:
-                print("", end="")
+                release_path = ad_directory + os.sep + match
+                if os.path.isdir(release_path):
+                    while response != 'y' and response != 'n':
+                        response = input("Detected " + match + " but could not find version. Register and "
+                                   "confirm version? (y/n) ").lower()
+                    if response == 'y':
+                        ver = input("Enter version: ")
+                        if match.startswith("AD"):
+                            plugin_dict[match[2:]] = [match, ver]
+                        else:
+                            plugin_dict[match] = [match, ver]
 
 if error is False:
     print("Done detecting plugins.")
