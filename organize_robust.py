@@ -29,7 +29,9 @@ plugin_dict = {
 plugin_list = []
 
 # list of filenames that can not be identified as part of a plugin or ADCore, populated by organize()
-unidentifiedFiles = []
+unidentifiedFiles_dict = {
+    # filename : path/to/file
+}
 
 # version of ADCore used
 ADCore_ver = ""
@@ -76,7 +78,7 @@ def organize(ad_dir, opi_dir):
                         ver = ADCore_ver
                         # print("Found ADCore file: " + file)
                     else:
-                        unidentifiedFiles.append(file)
+                        unidentifiedFiles_dict[file] = os.path.join(root, file)
                         continue
                 # construct new location of organized file
                 newPath = opi_directory + os.sep + dirName + os.sep + ver
@@ -96,10 +98,6 @@ def organize(ad_dir, opi_dir):
                         copyfile(oldPath, newPath)
                     if isPlugin is True:
                         cross_reference(opi_directory + os.sep + dirName + os.sep + ver, file, tag)
-                    if opi_directory in oldPath:
-                        oldFiles.append(oldPath)
-                #if old:
-                #    os.remove(oldPath)
     # do same thing for opi directory
     directory = opi_dir
     for file in os.listdir(opi_dir):
@@ -120,7 +118,7 @@ def organize(ad_dir, opi_dir):
                     ver = ADCore_ver
                     print("Found ADCore file: " + file)
                 else:
-                    unidentifiedFiles.append(file)
+                    unidentifiedFiles_dict[file] = os.path.join(opi_dir, file)
                     continue
             newPath = directory + os.sep + dirName + os.sep + ver
             oldPath = os.path.join(directory, file)
@@ -134,7 +132,13 @@ def organize(ad_dir, opi_dir):
                 if isPlugin is True:
                     cross_reference(directory, file, tag)
                     print("References updated.")
-                os.rename(oldPath, newPath)
+                try:
+                    os.rename(oldPath, newPath)
+                except FileExistsError:
+                    # if file exists in both new and old directory, remove old one
+                    os.remove(oldPath)
+                    print("File already exists.")
+                    continue
                 print("File moved.")
             else:
                 print("file is already organized.")
@@ -241,25 +245,25 @@ def convert_adls(ad_dir, opi_dir):
             args = css_path
             for arg in css_dict.keys():
                 args = args + " " + arg
-            # print(args)
-            os.system(args)
             # run(list(css_dict.keys()))
-            for file in list(css_dict.keys())[3:]:
-                if css_dict[file] == "":
-                    continue
-                # print(file)
-                opi = file[:-4] + ".opi"
-                # print(opi)
-                newPath = opi_dir + os.sep + css_dict[file][0] + os.sep + css_dict[file][1]
-                if not os.path.exists(newPath):
-                    os.makedirs(newPath)
-                newPath = newPath + os.sep + os.path.basename(opi)
-                # print("move: " + opi + " -> " + newPath)
-                os.rename(opi, newPath)
-            for p in file2plug.keys():
-                cross_reference(opi_dir + os.sep + file2plug[p][0] + os.sep + file2plug[p][1], p, file2plug[p][2])
+            os.system(args)
         except OSError:
             print("Could not run CS Studio. It may not have the adl2boy feature.")
+            return
+        for file in list(css_dict.keys())[3:]:
+            if css_dict[file] == "":
+                continue
+            # print(file)
+            opi = file[:-4] + ".opi"
+            # print(opi)
+            newPath = opi_dir + os.sep + css_dict[file][0] + os.sep + css_dict[file][1]
+            if not os.path.exists(newPath):
+                os.makedirs(newPath)
+            newPath = newPath + os.sep + os.path.basename(opi)
+            # print("move: " + opi + " -> " + newPath)
+            os.rename(opi, newPath)
+        for p in file2plug.keys():
+            cross_reference(opi_dir + os.sep + file2plug[p][0] + os.sep + file2plug[p][1], p, file2plug[p][2])
 
 
 # prompt the user to register a plugin into the search dictionary, using "suggestion" (if not None)
@@ -430,8 +434,8 @@ if css_path != "":
 
 print("\nDirectory successfully updated.\n")
 
-if len(unidentifiedFiles) != 0:
+if len(unidentifiedFiles_dict) != 0:
     print("Unidentified files:")
-    for file in unidentifiedFiles:
-        print("\t" + file)
+    for file in unidentifiedFiles_dict.keys():
+        print("\t" + file + " (" + unidentifiedFiles_dict[file] + ")")
 quit()
