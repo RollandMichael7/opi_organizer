@@ -2,7 +2,7 @@
 # into plugins and versions. Simultaneously, update any cross-references in the OPI files to be consistent with the
 # new directory structure so that they don't break. Also may use CS Studio to convert MEDM adl files into OPIs.
 # author: Michael Rolland
-# version: 2018-06-19
+# version: 2018-06-20
 
 import os
 import re
@@ -139,7 +139,7 @@ def cross_reference(root, file, tag):
 
 # Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
 def convert_adls(ad_dir, opi_dir):
-    css_dict = {css_path : "",
+    css_dict = {# css_path : "",
                 "-nosplash" : "",
                 "-application" : "",
                 "org.csstudio.opibuilder.adl2boy.application" : "",
@@ -186,11 +186,15 @@ def convert_adls(ad_dir, opi_dir):
                     css_dict[os.path.join(root, file)] = [plugin, ver]
                     if plugin != "ADCore":
                         file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
-    if len(css_dict) > 4:
+    if len(css_dict) > 3:
         try:
             print("Executing CS Studio...")
-            run(list(css_dict.keys()))
-            for file in list(css_dict.keys())[4:]:
+            args = css_path
+            for arg in css_dict.keys():
+                args = args + " " + arg
+            os.system(args)
+            # run(list(css_dict.keys()))
+            for file in list(css_dict.keys())[3:]:
                 # print(file)
                 opi = file[:-4] + ".opi"
                 # print(opi)
@@ -198,6 +202,7 @@ def convert_adls(ad_dir, opi_dir):
                 if not os.path.exists(newPath):
                     os.makedirs(newPath)
                 newPath = newPath + os.sep + os.path.basename(opi)
+                # print("move: " + opi + " -> " + newPath)
                 os.rename(opi, newPath)
             for p in file2plug.keys():
                 cross_reference(opi_dir + os.sep + file2plug[p][0] + os.sep + file2plug[p][1], p, file2plug[p][2])
