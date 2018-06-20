@@ -1,8 +1,9 @@
-# Given a "flat" directory of Area Detector OPI files, convert it to a hierarchical directory that groups OPIs
-# into plugins and versions. Simultaneously, update any cross-references in the OPI files to be consistent with the
-# new directory structure so that they don't break.
+# Given an Area Detector repository and a folder for OPI files, convert the OPI folder into a hierarchical directory
+# that groups OPIs into plugins and versions and extract OPIs from the AreaDetector repo into the folder.
+# Simultaneously, update any cross-references in the OPI files to be consistent with the new directory structure so that
+# they don't break. Also may use CS Studio to convert MEDM adl files into OPIs.
 # author: Michael Rolland
-# version: 2018-06-19
+# version: 2018-06-20
 
 import os
 import re
@@ -99,6 +100,43 @@ def organize(ad_dir, opi_dir):
                         oldFiles.append(oldPath)
                 if old:
                     os.remove(oldPath)
+    # do same thing for opi directory
+    for file in os.listdir(opi_dir):
+        if os.path.isfile(os.path.join(opi_dir, file)) and file.endswith(".opi"):
+            isPlugin = False
+            for plugin in plugin_dict.keys():
+                if plugin.casefold() in file.casefold():
+                    isPlugin = True
+                    print("Found plugin file: " + file)
+                    dirName = plugin_dict.get(plugin)[0]
+                    tag = plugin
+                    ver = plugin_dict.get(plugin)[1]
+                    print("plugin name: " + dirName)
+                    break
+            if isPlugin is False:
+                if "AD" in file or "ND" in file:
+                    dirName = "ADCore"
+                    ver = ADCore_ver
+                    print("Found ADCore file: " + file)
+                else:
+                    unidentifiedFiles.append(file)
+                    continue
+            newPath = directory + os.sep + dirName + os.sep + ver
+            oldPath = os.path.join(directory, file)
+            print("current path: " + oldPath)
+            if not os.path.exists(newPath):
+                print("making new folder...")
+                os.makedirs(newPath)
+            newPath = newPath + os.sep + file
+            if oldPath != newPath:
+                print("new path: " + newPath)
+                if isPlugin is True:
+                    cross_reference(directory, file, tag)
+                    print("References updated.")
+                os.rename(oldPath, newPath)
+                print("File moved.")
+            else:
+                print("file is already organized.")
 
 
 # given an OPI file moved by organize(), update its cross-references. The "tag" argument is the identifying

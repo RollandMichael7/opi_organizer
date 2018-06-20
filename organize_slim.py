@@ -1,6 +1,6 @@
 # Given a "flat" directory of Area Detector OPI files, convert it to a hierarchical directory that groups OPIs
 # into plugins and versions. Simultaneously, update any cross-references in the OPI files to be consistent with the
-# new directory structure so that they don't break.
+# new directory structure so that they don't break. Also may use CS Studio to convert MEDM adl files into OPIs.
 # author: Michael Rolland
 # version: 2018-06-19
 
