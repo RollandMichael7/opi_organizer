@@ -195,6 +195,8 @@ def convert_adls(ad_dir, opi_dir):
             os.system(args)
             # run(list(css_dict.keys()))
             for file in list(css_dict.keys())[3:]:
+                if css_dict[file] == "":
+                    continue
                 # print(file)
                 opi = file[:-4] + ".opi"
                 # print(opi)
