@@ -211,8 +211,10 @@ def convert_adls(ad_dir, opi_dir):
             newPath = newPath + os.sep + os.path.basename(opi)
             # print("move: " + opi + " -> " + newPath)
             os.rename(opi, newPath)
-        for p in file2plug.keys():
-            cross_reference(opi_dir + os.sep + file2plug[p][0] + os.sep + file2plug[p][1], p, file2plug[p][2])
+            for key in file2plug.keys():
+                if key in opi:
+                    cross_reference(opi_dir + os.sep + file2plug[key][0] + os.sep + file2plug[key][1], key,
+                                    file2plug[key][2])
 
 
 
