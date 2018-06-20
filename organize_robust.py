@@ -101,6 +101,7 @@ def organize(ad_dir, opi_dir):
                 if old:
                     os.remove(oldPath)
     # do same thing for opi directory
+    directory = opi_dir
     for file in os.listdir(opi_dir):
         if os.path.isfile(os.path.join(opi_dir, file)) and file.endswith(".opi"):
             isPlugin = False
