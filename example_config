@@ -11,6 +11,8 @@ is not included, the script will try to detect it. If it can not detect it, it w
 Because the script searches your local directory to confirm the existence of a plugin, putting plugins here that aren't
 locally available will not cause any issues. An invalid plugin name will be ignored.
 
+The plugin version here will be used by the script, regardless of whether it is accurate to the local repository.
+
 <Plugin name> [: version]
 
 ADADSC

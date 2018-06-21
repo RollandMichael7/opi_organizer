@@ -254,6 +254,9 @@ while len(matches) != 0 or start is True:
                 for line in open(config_path):
                     if match.casefold() in line.casefold():
                         skip = True
+                        verSearch = re.search(match + " : " + "(.*)", line)
+                        if verSearch is not None:
+                            ver = verSearch.group(1)
                         break
             response = ""
             plugin_list.append(match)
@@ -263,6 +266,14 @@ while len(matches) != 0 or start is True:
                 release = open(release_path)
                 found = False
                 for line in release:
+                    if ver != "":
+                        found = True
+                        if match.startswith("AD"):
+                            plugin_dict[match[2:]] = [match, ver]
+                        else:
+                            plugin_dict[match] = [match, ver]
+                        print("Registered " + match + " " + ver)
+                        break
                     if "Release Notes" in line:
                         search = True
                         continue
@@ -284,6 +295,7 @@ while len(matches) != 0 or start is True:
                                     print("Registered " + match + " " + plugin_ver)
                             break
                 if found is False:
+                    ver = ""
                     if config_path != "":
                         for line in open(config_path):
                             if match in line:
