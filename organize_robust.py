@@ -3,7 +3,7 @@
 # Simultaneously, update any cross-references in the OPI files to be consistent with the new directory structure so that
 # they don't break. Also may use CS Studio to convert MEDM adl files into OPIs.
 # author: Michael Rolland
-# version: 2018-06-20
+# version: 2018-06-21
 
 import os
 import re
@@ -11,7 +11,6 @@ import fileinput
 import sys
 from urllib.error import URLError
 from urllib.request import urlopen
-from subprocess import run
 from shutil import copyfile
 
 # example dict of some Area Detector plugins
@@ -38,13 +37,6 @@ ADCore_ver = ""
 
 # path to Control Systems Studio executable, used for converting adl files to opi files
 css_path = ""
-
-# Default constants to circumvent asking for user input. Set to None to ask for input
-DEFAULT_OPI_DIRECTORY = None
-
-DEFAULT_AD_DIRECTORY = None
-
-DEFAULT_CSS_DIRECTORY = None
 
 # given a directory of Area Detector files, construct a hierarchical directory that
 # groups OPIs into their respective plugins and versions
@@ -296,18 +288,60 @@ def search_directory(directory, query):
 
 ########################### MAIN ###########################
 response = ""
+config_path = ""
+foundOPI = False
+foundAD = False
+foundCSS = False
+
+opi_directory = ""
+ad_directory = ""
+
+while response != 'y' and response != 'n':
+    response = input("Use config file? (y/n) ").lower()
+if response == 'y':
+    while not os.path.isfile(config_path):
+        config_path = input("Enter path to config file: ")
+    for line in open(config_path):
+        if foundOPI and foundAD and foundCSS:
+            break
+        search = re.search("OPI_DIRECTORY : (.*)", line)
+        if search is not None and not foundOPI:
+            opi_directory = search.group(1)
+            if os.path.isdir(opi_directory):
+                print("OPI directory: " + opi_directory)
+                foundOPI = True
+            else:
+                print("OPI directory is invalid: " + opi_directory)
+                opi_directory = ""
+            continue
+        search = re.search("AD_DIRECTORY : (.*)", line)
+        if search is not None and not foundAD:
+            ad_directory = search.group(1)
+            if os.path.isdir(ad_directory):
+                print("AD directory: " + ad_directory)
+                foundAD = True
+            else:
+                print("AD directory is invalid: " + ad_directory)
+                ad_directory = ""
+            continue
+        search = re.search("CSS_PATH : (.*)", line)
+        if search is not None and not foundCSS:
+            css_path = search.group(1)
+            if os.path.isfile(css_path):
+                print("CSS path: " + css_path)
+                foundCSS = True
+            else:
+                print("CSS path is invalid: " + css_path)
+                css_path = ""
+            continue
 
 # get directory paths
-if DEFAULT_OPI_DIRECTORY is not None:
-    opi_directory = DEFAULT_OPI_DIRECTORY
-else:
+if not foundOPI:
     opi_directory = ""
     while not os.path.isdir(opi_directory):
         opi_directory = input("Enter path to target OPI directory: ")
 
-if DEFAULT_AD_DIRECTORY is not None:
-    ad_directory = DEFAULT_AD_DIRECTORY
-else:
+if not foundAD:
     ad_directory = ""
     while not os.path.isdir(ad_directory):
         ad_directory = input("Enter path to AreaDetector directory containing plugins: ")
@@ -330,14 +364,13 @@ except IOError:
     print("Could not detect ADCore version.")
     ADCore_ver = input("Enter ADCore version: ")
 
-# ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
-print("If installed, CS Studio can be used to convert MEDM adl files into BOY opi files.")
-while response != 'y' and response != 'n':
-    response = input("Use this feature? (y/n) ").lower()
-if response == 'y':
-    if DEFAULT_CSS_DIRECTORY is not None:
-        css_path = DEFAULT_CSS_DIRECTORY
-    else:
+if not foundCSS:
+    # ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
+    print("If installed, CS Studio can be used to convert MEDM adl files into BOY opi files.")
+    response = ""
+    while response != 'y' and response != 'n':
+        response = input("Use this feature? (y/n) ").lower()
+    if response == 'y':
         while not os.path.isfile(css_path):
             css_path = input("Enter path to CSS executable: ")
 
@@ -360,7 +393,14 @@ while len(matches) != 0 or start is True:
         break
     matches = re.findall("a href=\"/areaDetector/(.*)\" itemprop", repo)
     for match in matches:
+        skip = False
+        ver = ""
         if match != "ADCore" and match != "areaDetector":
+            if config_path != "":
+                for line in open(config_path):
+                    if match.casefold() in line.casefold():
+                        skip = True
+                        break
             response = ""
             plugin_list.append(match)
             release_path = ad_directory + os.sep + match + os.sep + "RELEASE.md"
@@ -378,36 +418,63 @@ while len(matches) != 0 or start is True:
                             found = True
                             response = ""
                             plugin_ver = version.group(1)
-                            while response != 'y' and response != 'n':
-                                response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
-                            if response == 'y':
+                            if skip is False:
+                                while response != 'y' and response != 'n':
+                                    response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
+                            if response == 'y' or skip is True:
                                 if match.startswith("AD"):
                                     plugin_dict[match[2:]] = [match, plugin_ver]
                                 else:
                                     plugin_dict[match] = [match, plugin_ver]
+                                if skip is True:
+                                    print("Registered " + match + " " + plugin_ver)
                             break
                 if found is False:
-                    while response != 'y' and response != 'n':
-                        response = input("Detected " + match + " but could not find version. Register and "
-                                   "confirm version? (y/n) ").lower()
-                    if response == 'y':
-                        ver = input("Enter version: ")
-                        if match.startswith("AD"):
-                            plugin_dict[match[2:]] = [match, ver]
+                    if config_path != "":
+                        for line in open(config_path):
+                            if match in line:
+                                verSearch = re.search(match + " : " + "(.*)", line)
+                                if verSearch is not None:
+                                    ver = verSearch.group(1)
+                                    break
+                    if ver == "":
+                        while response != 'y' and response != 'n':
+                            response = input("Detected " + match + " but could not find version. Register and "
+                                       "confirm version? (y/n) ").lower()
+                        if response == 'y':
+                            ver = input("Enter version: ")
                         else:
-                            plugin_dict[match] = [match, ver]
+                            continue
+                    if match.startswith("AD"):
+                        plugin_dict[match[2:]] = [match, ver]
+                    else:
+                        plugin_dict[match] = [match, ver]
+                    if skip is True:
+                        print("Registered " + match + " " + ver)
             except IOError:
                 release_path = ad_directory + os.sep + match
                 if os.path.isdir(release_path):
-                    while response != 'y' and response != 'n':
-                        response = input("Detected " + match + " but could not find version. Register and "
-                                   "confirm version? (y/n) ").lower()
-                    if response == 'y':
-                        ver = input("Enter version: ")
-                        if match.startswith("AD"):
-                            plugin_dict[match[2:]] = [match, ver]
+                    if config_path != "":
+                        for line in open(config_path):
+                            if match in line:
+                                verSearch = re.search(match + " : " + "(.*)", line)
+                                if verSearch is not None:
+                                    ver = verSearch.group(1)
+                                    break
+                    if ver == "":
+                        while response != 'y' and response != 'n':
+                            response = input("Detected " + match + " but could not find version. Register and "
+                                       "confirm version? (y/n) ").lower()
+                        if response == 'y':
+                            ver = input("Enter version: ")
                         else:
-                            plugin_dict[match] = [match, ver]
+                            continue
+                    if match.startswith("AD"):
+                        plugin_dict[match[2:]] = [match, ver]
+                    else:
+                        plugin_dict[match] = [match, ver]
+                    if skip is True:
+                        print("Registered " + match + " " + ver)
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
