@@ -66,7 +66,7 @@ def organize(directory):
                     break
             # else, it is either a part of ADCore or unidentifiable
             if isPlugin is False:
-                if "AD" in file or "ND" in file:
+                if "AD" in file or "ND" in file or "commonPlugins" in file:
                     dirName = "ADCore"
                     ver = ADCore_ver
                     print("Found ADCore file: " + file)

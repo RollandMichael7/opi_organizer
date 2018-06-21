@@ -61,24 +61,23 @@ def organize(ad_dir, opi_dir):
                 # check if the opi file matches one of the
                 # plugins being searched for
                 isPlugin = False
-                for plugin in plugin_dict.keys():
-                    if plugin.casefold() in file.casefold():
-                        isPlugin = True
-                        # print("Found plugin file: " + file)
-                        dirName = plugin_dict.get(plugin)[0]
-                        tag = plugin
-                        ver = plugin_dict.get(plugin)[1]
-                        print("Found " + dirName + " file: " + file + " (" + os.path.join(root, file) + ")")
-                        break
-                # else, it is either a part of ADCore or unidentifiable
-                if isPlugin is False:
-                    if "AD" in file or "ND" in file:
-                        dirName = "ADCore"
-                        ver = ADCore_ver
-                        print("Found ADCore file: " + file + " (" + os.path.join(root, file) + ")")
-                    else:
-                        unidentifiedFiles_dict[file] = os.path.join(root, file)
-                        continue
+                if "ADCore" in os.path.join(root, file):
+                    dirName = "ADCore"
+                    ver = ADCore_ver
+                    print("Found ADCore file: " + file + " (" + os.path.join(root, file) + ")")
+                else:
+                    for plugin in plugin_dict.keys():
+                        if plugin in os.path.join(root, file):
+                            isPlugin = True
+                            # print("Found plugin file: " + file)
+                            dirName = plugin_dict.get(plugin)[0]
+                            tag = plugin
+                            ver = plugin_dict.get(plugin)[1]
+                            print("Found " + dirName + " file: " + file + " (" + os.path.join(root, file) + ")")
+                            break
+                if isPlugin is False and dirName != "ADCore":
+                    unidentifiedFiles_dict[file] = os.path.join(root, file)
+                    continue
                 # construct new location of organized file
                 newPath = opi_directory + os.sep + dirName + os.sep + ver
                 oldPath = os.path.join(root, file)
@@ -115,7 +114,7 @@ def organize(ad_dir, opi_dir):
                     print("Found " + dirName + " file: " + file + " (" + os.path.join(opi_dir, file) + ")")
                     break
             if isPlugin is False:
-                if "AD" in file or "ND" in file:
+                if "AD" in file or "ND" in file or "commonPlugins" in file:
                     dirName = "ADCore"
                     ver = ADCore_ver
                     print("Found ADCore file: " + file + " (" + os.path.join(opi_dir, file) + ")")
@@ -174,7 +173,7 @@ def cross_reference(root, file, tag):
                 search = re.search("</opi_file>(.*)", line)
                 if search is not None:
                     after = search.group(1)
-                if "AD" in path or "ND" in path:
+                if "AD" in path or "ND" in path or "commonPlugins" in path:
                     newPath = "ADCore" + os.sep + ADCore_ver
                 else:
                     for plugin in plugin_dict.keys():
@@ -211,21 +210,18 @@ def convert_adls(ad_dir, opi_dir):
                 plugin = ""
                 ver = ""
                 tag = ""
-                for p in plugin_list:
-                    if p in os.path.join(root, file):
-                        plugin = p
-                        break
-                for key in plugin_dict.keys():
-                    if plugin == plugin_dict[key][0]:
-                        ver = plugin_dict[key][1]
-                        tag = key
-                        break
                 # identify which plugin the adl belongs to
-                if plugin == "" and ver == "":
-                    if "AD" in file or "ND" in file:
-                        plugin = "ADCore"
-                        ver = ADCore_ver
-                        tag = None
+                if "ADCore" in os.path.join(root, file):
+                    plugin = "ADCore"
+                    ver = ADCore_ver
+                    tag = None
+                else:
+                    for p in plugin_dict.keys():
+                        if plugin_dict[p][0] in os.path.join(root, file):
+                            plugin = plugin_dict[p][0]
+                            ver = plugin_dict[p][1]
+                            tag = p
+                            break
                 # if it was identified, check if its already been converted previously
                 # (to avoid executing CS Studio too much)
                 if plugin != "" and ver != "":
@@ -467,11 +463,12 @@ else:
         plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 # do the organizing
-organize(ad_directory, opi_directory)
 if css_path != "":
     print("Converting adl files...")
     convert_adls(ad_directory, opi_directory)
+print("\nAll ADL files converted.\n")
 
+organize(ad_directory, opi_directory)
 print("\nDirectory successfully updated.\n")
 
 # print the path to any unidentified files that were found (and thus left untouched)
