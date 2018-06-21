@@ -194,11 +194,8 @@ def cross_reference(root, file, tag):
 # Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
 def convert_adls(ad_dir, opi_dir):
     # arguments used in executing CS Studio
-    css_dict = {# css_path : "",
-                "-nosplash" : "",
-                "-application" : "",
-                "org.csstudio.opibuilder.adl2boy.application" : "",
-                # /path/to/adl/file : [plugin name, plugin version]
+    css_dict = {
+        # /path/to/adl/file : [plugin name, plugin version]
     }
     file2plug =  {
         # converted opi filename : [plugin name, plugin version, plugin key]
@@ -243,7 +240,7 @@ def convert_adls(ad_dir, opi_dir):
     if len(css_dict) > 3:
         try:
             print("Executing CS Studio...")
-            args = css_path
+            args = css_path + " -nosplash -application org.csstudio.opibuilder.adl2boy.application"
             for arg in css_dict.keys():
                 args = args + " " + arg
             # run(list(css_dict.keys()))
