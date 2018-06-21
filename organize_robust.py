@@ -60,6 +60,8 @@ def organize(ad_dir, opi_dir):
                 else:
                     for plugin in plugin_dict.keys():
                         if plugin in os.path.join(root, file):
+                            if plugin == "ADAndor" and "ADAndor3" in os.path.join(root,file):
+                                continue
                             isPlugin = True
                             # print("Found plugin file: " + file)
                             dirName = plugin_dict.get(plugin)[0]
@@ -98,6 +100,8 @@ def organize(ad_dir, opi_dir):
             isPlugin = False
             for plugin in plugin_dict.keys():
                 if plugin.casefold() in file.casefold():
+                    if plugin == "Andor" and "Andor3" in file:
+                        continue
                     isPlugin = True
                     # print("Found plugin file: " + file)
                     dirName = plugin_dict.get(plugin)[0]
@@ -156,6 +160,8 @@ def cross_reference(root, file, tag):
                 # ignore reference to OPI of the same plugin
                 # (does not need to be changed)
                 if tag.casefold() in path.casefold():
+                    if tag == "Andor" and "Andor3" in path:
+                        continue
                     sys.stderr.write("Reference to same plugin left unchanged\n\n")
                     print(line, end="")
                     continue
@@ -207,6 +213,8 @@ def convert_adls(ad_dir, opi_dir):
                 else:
                     for p in plugin_dict.keys():
                         if plugin_dict[p][0] in os.path.join(root, file):
+                            if plugin_dict[p][0] == "ADAndor" and "Andor3" in os.path.join(root, file):
+                                continue
                             plugin = plugin_dict[p][0]
                             ver = plugin_dict[p][1]
                             tag = p
