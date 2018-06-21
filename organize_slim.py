@@ -34,15 +34,10 @@ unidentifiedFiles_dict = {
 # version of ADCore used
 ADCore_ver = ""
 
-# path to Control Systems Studio executable, used for converting adl files to opi files
-css_path = ""
-
 # Default constants to circumvent asking for user input. Set to None to ask for input
 DEFAULT_OPI_DIRECTORY = None
 
 DEFAULT_AD_DIRECTORY = None
-
-DEFAULT_CSS_DIRECTORY = None
 
 # given a flat directory of Area Detector OPIs, convert it to a hierarchical directory that
 # groups OPIs into their respective plugins and versions
@@ -139,87 +134,6 @@ def cross_reference(root, file, tag):
     print("Updated.")
 
 
-# Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
-def convert_adls(ad_dir, opi_dir):
-    # arguments used in executing CS Studio
-    css_dict = {  # css_path : "",
-        "-nosplash": "",
-        "-application": "",
-        "org.csstudio.opibuilder.adl2boy.application": "",
-        # /path/to/adl/file : [plugin name, plugin version]
-    }
-    file2plug =  {
-        # converted opi filename : [plugin name, plugin version, plugin key]
-    }
-    for root, dirs, files in os.walk(ad_dir):
-        for file in files:
-            if file.endswith(".adl"):
-                print(file)
-                plugin = ""
-                ver = ""
-                tag = ""
-                # identify which plugin the adl belongs to
-                for p in plugin_list:
-                    if p in os.path.join(root, file):
-                        plugin = p
-                        break
-                for key in plugin_dict.keys():
-                    if plugin == plugin_dict[key][0]:
-                        ver = plugin_dict[key][1]
-                        tag = key
-                        break
-                if plugin == "" and ver == "":
-                    if "AD" in file or "ND" in file:
-                        plugin = "ADCore"
-                        ver = ADCore_ver
-                        tag = None
-                # if it was identified, check if its already been converted previously
-                # (to avoid executing CS Studio too much)
-                if plugin != "" and ver != "":
-                    newPath = opi_dir + os.sep + plugin + os.sep + ver
-                    opi = file[:-4] + ".opi"
-                    # if <filename>.opi already exists in the OPI folder, it has been converted and moved
-                    # already (adl files are not removed after being converted)
-                    if os.path.isfile(newPath + os.sep + opi):
-                        print("File has already been converted.")
-                        continue
-                    # if <filename>.opi already exists in the adl folder, it has been converted but
-                    # not moved, so it is deleted and converted/moved again for simplicity
-                    if os.path.isfile(os.path.join(root,file)[:-4] + ".opi"):
-                        os.remove(os.path.join(root,file)[:-4] + ".opi")
-                    css_dict[os.path.join(root, file)] = [plugin, ver]
-                    if plugin != "ADCore":
-                        file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
-    if len(css_dict) > 3:
-        try:
-            print("Executing CS Studio...")
-            args = css_path
-            for arg in css_dict.keys():
-                args = args + " " + arg
-            # run(list(css_dict.keys()))
-            os.system(args)
-        except OSError:
-            print("Could not run CS Studio. It may not have the adl2boy feature.")
-            return
-        for file in list(css_dict.keys())[3:]:
-            if css_dict[file] == "":
-                continue
-            # print(file)
-            opi = file[:-4] + ".opi"
-            # print(opi)
-            newPath = opi_dir + os.sep + css_dict[file][0] + os.sep + css_dict[file][1]
-            if not os.path.exists(newPath):
-                os.makedirs(newPath)
-            newPath = newPath + os.sep + os.path.basename(opi)
-            # print("move: " + opi + " -> " + newPath)
-            os.rename(opi, newPath)
-            for key in file2plug.keys():
-                if key in opi:
-                    cross_reference(opi_dir + os.sep + file2plug[key][0] + os.sep + file2plug[key][1], key,
-                                    file2plug[key][2])
-
-
-
 # prompt the user to register a plugin into the search dictionary, using "suggestion" (if not None)
 #  as a suggested search term
 def register_plugin(plugin, suggestion):
@@ -282,17 +196,6 @@ try:
 except IOError:
     print("Could not detect ADCore version.")
     ADCore_ver = input("Enter ADCore version: ")
-
-# ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
-print("If installed, CS Studio can be used to convert MEDM adl files into BOY opi files.")
-while response != 'y' and response != 'n':
-    response = input("Use this feature? (y/n) ").lower()
-if response == 'y':
-    if DEFAULT_CSS_DIRECTORY is not None:
-        css_path = DEFAULT_CSS_DIRECTORY
-    else:
-        while not os.path.isfile(css_path):
-            css_path = input("Enter path to CSS executable: ")
 
 # search the github repository for AreaDetector plugins; compare against the user's AreaDetector directory
 # and prompt the user to confirm the existence of any matches found (as well as the version if it can not be found)
@@ -414,9 +317,6 @@ else:
 
 # do the organizing
 organize(opi_directory)
-if css_path != "":
-    print("Converting adl files...")
-    convert_adls(ad_directory, opi_directory)
 
 print("\nDirectory successfully updated.\n")
 
