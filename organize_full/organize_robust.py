@@ -60,7 +60,7 @@ def organize(ad_dir, opi_dir):
                 else:
                     for plugin in plugin_dict.keys():
                         if plugin in os.path.join(root, file):
-                            if plugin == "ADAndor" and "ADAndor3" in os.path.join(root,file):
+                            if plugin == "Andor" and "ADAndor3" in os.path.join(root,file):
                                 continue
                             isPlugin = True
                             # print("Found plugin file: " + file)
