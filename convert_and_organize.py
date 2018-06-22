@@ -1,3 +1,11 @@
+# Given an Area Detector repository, a folder for OPI files, and CS Studio, converts MEDM adl files from the AD repo
+# into OPIs and organize them into a hierarchical directory that groups by plugin and version.
+# This will break any references from an OPI of one plugin to an OPI of another (such as any reference to ADCore),
+# which can be fixed with update_references.py
+# author: Michael Rolland
+# version: 2018.06.22
+
+
 import os
 import re
 import fileinput

@@ -1,6 +1,8 @@
-# Given a directory of OPI files created by convert_and_organize, update the OPIs references to other OPIs so that they
-# do not break in the new directory structure; uses macros so that the version of a referenced plugin can be chosen at
-# runtime.
+# Given a directory of OPI files created by convert_and_organize.py, update the OPI's references to other OPIs so that
+# they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
+# chosen at runtime.
+# author: Michael Rolland
+# version: 2018-06-22
 
 
 import os
@@ -21,7 +23,7 @@ plugin_dict = {
     # "simdetector": "ADSimDetector",
 }
 
-# list of filenames that can not be identified as part of a plugin or ADCore, populated by organize()
+# list of filenames that can not be identified as part of a plugin or ADCore
 unidentifiedFiles_dict = {
     # filename : path/to/file
 }
@@ -29,8 +31,7 @@ unidentifiedFiles_dict = {
 plugin_list = []
 
 
-# given an OPI file directory created by organize(), update its cross-references. The "tag" argument is the identifying
-# substring for the plugin "file" belongs to
+# given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
     for root, folders, files in os.walk(opi_dir):
         for file in files:
@@ -45,9 +46,6 @@ def cross_reference(opi_dir):
                         if p == "Andor" and "Andor3" in os.path.join(root, file):
                             continue
                         tag = p
-                        # print("path: " + os.path.join(root, file))
-                        # print("match: " + plugin_dict[p])
-                        # print("file: " + file + " tag: " + tag)
                         break
                 if tag == "":
                     unidentifiedFiles_dict[file] = os.path.join(root, file)
@@ -63,8 +61,8 @@ def cross_reference(opi_dir):
                             before = ""
                             after = ""
                             path = path.group(1)
-                            #if "$" in path:
-                            #   continue
+                            if "$" in path:
+                               continue
                             sys.stderr.write("line " + str(lineNum + 1) + ": " + line)
                             # ignore reference to OPI of the same plugin
                             # (does not need to be changed)
@@ -104,6 +102,7 @@ def cross_reference(opi_dir):
                     add_macros(os.path.join(root,file), macro_list)
 
 
+# Called by cross_reference to add the macros into the OPI so that they can be easily seen and used
 def add_macros(filePath, macros):
     done = False
     print("Adding macros for " + os.path.basename(filePath) + "...")
@@ -115,6 +114,7 @@ def add_macros(filePath, macros):
             line = line + macro_str
             done = True
         print(line, end="")
+
 
 ########################### MAIN ###########################
 response = ""
