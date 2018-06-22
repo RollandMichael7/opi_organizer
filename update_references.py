@@ -44,7 +44,7 @@ def cross_reference(opi_dir):
                 for p in plugin_dict.keys():
                     if plugin_dict[p] in os.path.join(root, file):
                         if p == "Andor" and "Andor3" in os.path.join(root, file):
-                            continue
+                            p = "Andor3"
                         tag = p
                         break
                 if tag == "":
