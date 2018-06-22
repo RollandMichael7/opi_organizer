@@ -11,20 +11,22 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 # example dict of some Area Detector plugins
-# dict matches filename substring with plugin name and version
+# dict matches filename substring with plugin name
 plugin_dict = {
-    # "andor"      : ["ADAndor3", "R2-2"],
-    # "dexela"     : ["ADDexela", "R2-1"],
-    # "eiger"      : ["ADEiger", "R2-5"],
-    # "pilatus"    : ["ADPilatus", "R2-5"],
-    # "prosilica"  : ["ADProsilica", "R2-4"],
-    # "simdetector": ["ADSimDetector", "R2-7"],
+    # "andor"      : "ADAndor3,
+    # "dexela"     : "ADDexela",
+    # "eiger"      : "ADEiger",
+    # "pilatus"    : "ADPilatus",
+    # "prosilica"  : "ADProsilica",
+    # "simdetector": "ADSimDetector",
 }
 
 # list of filenames that can not be identified as part of a plugin or ADCore, populated by organize()
 unidentifiedFiles_dict = {
     # filename : path/to/file
 }
+
+plugin_list = []
 
 
 # given an OPI file directory created by organize(), update its cross-references. The "tag" argument is the identifying
@@ -33,15 +35,19 @@ def cross_reference(opi_dir):
     for root, folders, files in os.walk(opi_dir):
         for file in files:
             if file.endswith(".opi"):
+                macro_list = []
                 plugin = ""
                 tag = ""
                 if "ADCore" in os.path.join(root, file):
                     continue
                 for p in plugin_dict.keys():
-                    if plugin_dict[p][0] in os.path.join(root, file):
+                    if plugin_dict[p] in os.path.join(root, file):
                         if p == "Andor" and "Andor3" in os.path.join(root, file):
                             continue
                         tag = p
+                        # print("path: " + os.path.join(root, file))
+                        # print("match: " + plugin_dict[p])
+                        # print("file: " + file + " tag: " + tag)
                         break
                 if tag == "":
                     unidentifiedFiles_dict[file] = os.path.join(root, file)
@@ -54,12 +60,11 @@ def cross_reference(opi_dir):
                     if "<opi_file>" in line:
                         path = re.search("<opi_file>(.*)</opi_file>", line)
                         if path is not None:
-                            newPath = ""
                             before = ""
                             after = ""
                             path = path.group(1)
-                            if "$" in path:
-                                continue
+                            #if "$" in path:
+                            #   continue
                             sys.stderr.write("line " + str(lineNum + 1) + ": " + line)
                             # ignore reference to OPI of the same plugin
                             # (does not need to be changed)
@@ -87,12 +92,29 @@ def cross_reference(opi_dir):
                             if plugin != "":
                                 line = before + "<opi_file>" + "$(path" + plugin + ")" + os.sep + \
                                        path + "</opi_file>" + after + "\n"
+                                if ("path" + plugin) not in macro_list:
+                                    macro_list.append("path" + plugin)
                             else:
                                 sys.stderr.write("Tag can not be identified; routed to original directory\n\n")
                                 line = before + "<opi_file>" + ".." + os.sep + ".." + os.sep + path + "</opi_file>" + after + "\n"
                             sys.stderr.write("converted to: " + line)
                     print(line, end="")
                 print("References updated.")
+                if len(macro_list) > 0:
+                    add_macros(os.path.join(root,file), macro_list)
+
+
+def add_macros(filePath, macros):
+    done = False
+    print("Adding macros for " + os.path.basename(filePath) + "...")
+    for lineNum, line in enumerate(fileinput.input(filePath, inplace=True)):
+        if "<macros>" in line and not done:
+            macro_str = ""
+            for macro in macros:
+                macro_str += "\t<" + macro + ">" + "</" + macro + ">" + "\n"
+            line = line + macro_str
+            done = True
+        print(line, end="")
 
 ########################### MAIN ###########################
 response = ""
@@ -164,6 +186,7 @@ while len(matches) != 0 or start is True:
         break
     matches = re.findall("a href=\"/areaDetector/(.*)\" itemprop", repo)
     for match in matches:
+        plugin_list.append(match)
         skip = False
         ver = ""
         if match != "ADCore" and match != "areaDetector":
@@ -236,10 +259,9 @@ else:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":
-        version = input("Enter version: ")
         substr = input("Enter filename substring to search for: ")
-        plugin_dict[substr] = [plugin, version]
-        print(plugin + " version " + version + " added to search, identifying with \"" + substr + "\".")
+        plugin_dict[substr] = plugin
+        print(plugin + " added to search, identifying with \"" + substr + "\".")
         plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 cross_reference(opi_directory)
