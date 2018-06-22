@@ -3,6 +3,8 @@ A python script that converts a flat directory of AreaDetector Control System St
 
 If the user has CS Studio installed, the "robust" version of the script also uses the adl2boy feature to convert MEDM adl files into opi files and places them in their appropriate place in the new directory.
 
+**The functions of OPI Organizer have been split into two scripts: convert_and_organize which converts ADL files into OPIs and organzes them, and update_references which replace references to other OPIs with macros which can be used to select which version of a plugin the user wants to link to at runtime.**
+
 A config file can be used to give a path to the local OPI folder, a path to the local Area Detector directory, a path to the CS Studio executable, and a list of plugins (and, if necessary, their versions) to register in the organization.
 
 ## Slim ##
