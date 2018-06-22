@@ -1,20 +1,20 @@
-Any combination of these options can be included; none are required.
-CSS_PATH is ignored by the slim version.
+# Any combination of these options can be included; none are required.
+# CSS_PATH is ignored by the slim version.
 
 OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
 AD_DIRECTORY : C:\\Users\\mikes\\Documents\\AreaDetector
 CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
 
-All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Remove any plugin you
-do not want registered in the search.
-Plugin names are case sensitive. Each plugin must be on its own line. ADCore does not need to be included. If a version
-is not included, the script will try to detect it. If it can not detect it, it will prompt you to enter the version.
-Because the script searches your local directory to confirm the existence of a plugin, putting plugins here that aren't
-locally available will not cause any issues. An invalid plugin name will be ignored.
+# All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Remove any plugin you
+# do not want registered in the search.
+# Plugin names are case sensitive. Each plugin must be on its own line. ADCore does not need to be included. If a version
+# is not included, the script will try to detect it. If it can not detect it, it will prompt you to enter the version.
+# Because the script searches your local directory to confirm the existence of a plugin, putting plugins here that aren't
+# locally available will not cause any issues. An invalid plugin name will be ignored.
 
-The plugin version here will be used by the script, regardless of whether it is accurate to the local repository.
+# The plugin version here will be used by the script, regardless of whether it is accurate to the local repository.
 
-<Plugin name> [: version]
+# <Plugin name> [: version]
 
 ADADSC
 ADAndor

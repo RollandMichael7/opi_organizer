@@ -2,7 +2,7 @@
 # into plugins and versions. Simultaneously, update any cross-references in the OPI files to be consistent with the
 # new directory structure so that they don't break. Also may use CS Studio to convert MEDM adl files into OPIs.
 # author: Michael Rolland
-# version: 2018-06-21
+# version: 2018-06-22
 
 import os
 import re
@@ -178,6 +178,8 @@ if response == 'y':
     for line in open(config_path):
         if foundOPI and foundAD:
             break
+        if "#" in line:
+            continue
         search = re.search("OPI_DIRECTORY : (.*)", line)
         if search is not None and not foundOPI:
             opi_directory = search.group(1)
@@ -252,6 +254,8 @@ while len(matches) != 0 or start is True:
         if match != "ADCore" and match != "areaDetector":
             if config_path != "":
                 for line in open(config_path):
+                    if "#" in line:
+                        continue
                     if match.casefold() in line.casefold():
                         skip = True
                         verSearch = re.search(match + " : " + "(.*)", line)
@@ -298,6 +302,8 @@ while len(matches) != 0 or start is True:
                     ver = ""
                     if config_path != "":
                         for line in open(config_path):
+                            if "#" in line:
+                                continue
                             if match in line:
                                 verSearch = re.search(match + " : " + "(.*)", line)
                                 if verSearch is not None:
