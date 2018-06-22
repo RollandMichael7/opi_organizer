@@ -30,6 +30,7 @@ unidentifiedFiles_dict = {
 
 plugin_list = []
 
+ADCore_ver = ""
 
 # given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
@@ -110,7 +111,10 @@ def add_macros(filePath, macros):
         if "<macros>" in line and not done:
             macro_str = ""
             for macro in macros:
-                macro_str += "\t<" + macro + ">" + "</" + macro + ">" + "\n"
+                macro_str += "\t<" + macro + ">"
+                if macro == "pathCore":
+                    macro_str += "../../ADCore/" + ADCore_ver
+                macro_str += "</" + macro + ">" + "\n"
             line = line + macro_str
             done = True
         print(line, end="")
@@ -135,7 +139,7 @@ if response == 'y':
             break
         if "#" in line:
             continue
-        search = re.search("OPI_DIRECTORY : (.*)", line)
+        search = re.search("AD_OPI_DIRECTORY : (.*)", line)
         if search is not None and not foundOPI:
             opi_directory = search.group(1)
             if os.path.isdir(opi_directory):
@@ -166,6 +170,25 @@ if not foundAD:
     ad_directory = ""
     while not os.path.isdir(ad_directory):
         ad_directory = input("Enter path to AreaDetector directory containing plugins: ")
+        
+core_path = ad_directory + os.sep + "ADCore" + os.sep + "RELEASE.md"
+try:
+    search = False
+    core = open(core_path)
+    for line in core:
+        if "Release Notes" in line:
+            search = True
+            continue
+        if search is True:
+            core_ver = re.search("(R\d+-\d+(?:-\d+)*)", line)
+            if core_ver is not None:
+                ADCore_ver = core_ver.group(1)
+                print("Detected ADCore " + ADCore_ver)
+                break
+except IOError:
+    print("Could not detect ADCore version.")
+    ADCore_ver = input("Enter ADCore version: ")
+
 
 # search the github repository for AreaDetector plugins; compare against the user's AreaDetector directory
 # and prompt the user to confirm the existence of any matches found (as well as the version if it can not be found)
