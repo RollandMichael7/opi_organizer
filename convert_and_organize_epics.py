@@ -12,6 +12,7 @@ import sys
 from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
+import subprocess
 
 # dict matches plugin name with plugin version
 plug2ver = {
@@ -288,6 +289,12 @@ while len(matches) != 0 or start is True:
         if not found:
             release_path = epics_directory + os.sep + match
             if os.path.isdir(release_path):
+                dirPath = os.path.abspath(release_path) + os.sep + ".git"
+                command = ["git", "--git-dir=" + dirPath, "describe", "--tags", "$(git rev-list --tags --max-count=1)"]
+                output = subprocess.check_output(command)
+                if "fatal" in output:
+                    
+                print(output)
                 while response != 'y' and response != 'n':
                     response = input("Detected " + match + " but could not find version. Register and "
                                "confirm version? (y/n) ").lower()
