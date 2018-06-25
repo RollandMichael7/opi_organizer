@@ -7,8 +7,6 @@
 
 import os
 import re
-import fileinput
-import sys
 from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
@@ -290,17 +288,25 @@ while len(matches) != 0 or start is True:
             release_path = epics_directory + os.sep + match
             if os.path.isdir(release_path):
                 dirPath = os.path.abspath(release_path) + os.sep + ".git"
-                command = ["git", "--git-dir=" + dirPath, "describe", "--tags", "$(git rev-list --tags --max-count=1)"]
-                output = subprocess.check_output(command)
-                if "fatal" in output:
-                    
-                print(output)
-                while response != 'y' and response != 'n':
-                    response = input("Detected " + match + " but could not find version. Register and "
+                command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+                output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+                verSearch = re.search("(R\d+-\d+)", output)
+                if verSearch is not None:
+                    ver = verSearch.group(1)
+                    print("version: " + ver)
+                    response = ""
+                    while response != 'y' and response != 'n':
+                        response = input("Register " + match + " " + version + "? (y/n) "
+                    if response == 'y':
+                        plug2ver[match] = ver
+                else:
+                    print(output)
+                    while response != 'y' and response != 'n':
+                        response = input("Detected " + match + " but could not find version. Register and "
                                "confirm version? (y/n) ").lower()
-                if response == 'y':
-                    ver = input("Enter version: ")
-                    plug2ver[match] = ver
+                    if response == 'y':
+                        ver = input("Enter version: ")
+                        plug2ver[match] = ver
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
