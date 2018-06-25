@@ -293,20 +293,28 @@ while len(matches) != 0 or start is True:
                 verSearch = re.search("(R\d+-\d+)", output)
                 if verSearch is not None:
                     ver = verSearch.group(1)
-                    print("version: " + ver)
+                    # print("version: " + ver)
                     response = ""
                     while response != 'y' and response != 'n':
-                        response = input("Register " + match + " " + version + "? (y/n) "
+                        response = input("Register " + match + " " + ver + "? (y/n) ")
                     if response == 'y':
                         plug2ver[match] = ver
                 else:
-                    print(output)
-                    while response != 'y' and response != 'n':
-                        response = input("Detected " + match + " but could not find version. Register and "
-                               "confirm version? (y/n) ").lower()
-                    if response == 'y':
-                        ver = input("Enter version: ")
-                        plug2ver[match] = ver
+                    verSearch = re.search("(\d+.\d+.\d+)", output)
+                    if verSearch is not None:
+                        ver = verSearch.group(1)
+                        response = ""
+                        while response != 'y' and response != 'n':
+                            response = input("Register " + match + " " + ver + "? (y/n) ")
+                        if response == 'y':
+                            plug2ver[match] = ver
+                    else:
+                        while response != 'y' and response != 'n':
+                            response = input("Detected " + match + " but could not find version. Register and "
+                                             "confirm version? (y/n) ").lower()
+                        if response == 'y':
+                            ver = input("Enter version: ")
+                            plug2ver[match] = ver
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
