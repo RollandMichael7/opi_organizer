@@ -288,9 +288,14 @@ while len(matches) != 0 or start is True:
             release_path = epics_directory + os.sep + match
             if os.path.isdir(release_path):
                 dirPath = os.path.abspath(release_path) + os.sep + ".git"
-                command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
-                output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                verSearch = re.search("(R\d+-\d+)", output)
+                try:
+                    command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+                    output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    verSearch = re.search("(R\d+-\d+)", output)
+                except FileNotFoundError:
+                    output = ""
+                    verSearch = None
+                    print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
                 if verSearch is not None:
                     ver = verSearch.group(1)
                     # print("version: " + ver)
@@ -300,7 +305,8 @@ while len(matches) != 0 or start is True:
                     if response == 'y':
                         plug2ver[match] = ver
                 else:
-                    verSearch = re.search("(\d+.\d+.\d+)", output)
+                    if output != "":
+                        verSearch = re.search("(\d+.\d+.\d+)", output)
                     if verSearch is not None:
                         ver = verSearch.group(1)
                         response = ""
