@@ -26,6 +26,7 @@ OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
 
 # <Plugin name> [: version]
 
+# AreaDetector plugins
 ADADSC
 ADAndor
 ADAndor3
@@ -59,7 +60,7 @@ ADURL
 ADViewers
 ADmar345
 ADmarCCD
-ADnED
+ADnED : R1-0
 NDDriverStdArrays
 aravisGigE
 ffmpegServer
@@ -67,3 +68,8 @@ ffmpegviewer
 firewireDCAM
 pvaDriver
 
+# some EPICS modules
+asyn : R4-33
+motor : R6-10-1
+calc : R3-7
+autosave : R5-9
