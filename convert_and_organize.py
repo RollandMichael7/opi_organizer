@@ -89,13 +89,21 @@ def convert_adls(ad_dir, opi_dir):
                         file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
                         # print("key: " + file[:-4] + ".opi")
     if len(css_dict) > 3:
+        i = 0
+        done = False
         try:
-            print("Executing CS Studio...")
-            args = css_path + " -nosplash -application org.csstudio.opibuilder.adl2boy.application"
-            for arg in css_dict.keys():
-                args = args + " " + arg
-            # run(list(css_dict.keys()))
-            os.system(args)
+            while not done:
+                print("Executing CS Studio...")
+                args = css_path + " -nosplash -application org.csstudio.opibuilder.adl2boy.application"
+                adl = list(css_dict.keys())
+                while i < len(adl):
+                    if len(args + adl[i]) > 8100:
+                        break
+                    args = args + " " + adl[i]
+                    i += 1
+                if i == len(adl):
+                    done = True
+                os.system(args)
         except OSError:
             print("Could not run CS Studio. It may not have the adl2boy feature.")
             return
