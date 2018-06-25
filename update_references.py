@@ -63,8 +63,8 @@ def cross_reference(opi_dir):
                             if plugin != tag:
                                 line = before + "<opi_file>" + "$(path" + plugin + ")" + os.sep + \
                                        path + "</opi_file>" + after + "\n"
-                                if ("path" + plugin) not in macro_dict.keys():
-                                    macro_dict["path" + plugin] = ver
+                                if plugin not in macro_dict.keys():
+                                    macro_dict[plugin] = ver
                                 sys.stderr.write("converted to: " + line)
                             else:
                                 sys.stderr.write("Reference to same plugin left unchanged\n\n")
@@ -82,9 +82,9 @@ def add_macros(filePath, macros):
         if "<macros>" in line and not done:
             macro_str = ""
             for macro in macros.keys():
-                macro_str += "\t<" + macro + ">"
-                macro_str += ".." + os.sep + ".." + os.sep + macro +  macros[macro]
-                macro_str += "</" + macro + ">" + "\n"
+                macro_str += "\t<" + "path" + macro + ">"
+                macro_str += ".." + os.sep + ".." + os.sep + macro + os.sep + macros[macro]
+                macro_str += "</" + "path" +  macro + ">" + "\n"
             line = line + macro_str
             done = True
         print(line, end="")
