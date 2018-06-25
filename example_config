@@ -1,9 +1,19 @@
 # Any combination of these options can be included; none are required.
-# CSS_PATH is ignored by the slim version.
+# CSS_PATH is ignored by the slim version, and is only used by convert scripts.
 
-OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
-AD_DIRECTORY : C:\\Users\\mikes\\Documents\\AreaDetector
 CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
+
+# used only by convert_and_organize_epics.py
+EPICS_DIRECTORY : C:\\Users\\mikes\\Documents\\EPICS
+EPICS_OPI_DIRECTORY : C:\\Users\\mikes\Documents\\OPIs\\EPICS
+
+# used only by convert_and_organize_ad.py
+AD_DIRECTORY : C:\\Users\\mikes\\Documents\\AreaDetector
+AD_OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs\\ADet
+
+# used only by organize_robust.py and organize_slim.py and update_references.py
+OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
+
 
 # All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Remove any plugin you
 # do not want registered in the search.
@@ -16,6 +26,7 @@ CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
 
 # <Plugin name> [: version]
 
+# AreaDetector plugins
 ADADSC
 ADAndor
 ADAndor3
@@ -49,7 +60,7 @@ ADURL
 ADViewers
 ADmar345
 ADmarCCD
-ADnED
+ADnED : R1-0
 NDDriverStdArrays
 aravisGigE
 ffmpegServer
@@ -57,3 +68,8 @@ ffmpegviewer
 firewireDCAM
 pvaDriver
 
+# some EPICS modules
+asyn : R4-33
+motor : R6-10-1
+calc : R3-7
+autosave : R5-9
