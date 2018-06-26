@@ -2,7 +2,7 @@
 
 **OPI Organizer has been split into several "component" scripts which are called in succession by the run.sh bash script.** Two of the components are convert_and_organize_ad.py and convert_and_organize_epics.py which take directories of either AreaDetector plugins or EPICS modules and extract their ADL files, convert them into OPI files, and put them into a target OPI folder in a heirarchy organized by plugin/module and version. In doing so, these scripts require a path to a CS-Studio executable which can perform this conversion. The third component is update_references.py which takes the files sorted by the other two scripts **(the OPIs *must* be in that organization for this script to work)** and updates their references to other OPIs to function in this new directory structure; in doing this, it uses macros (and default values based on the current directory) such that the version of a linked plugin can be chosen at runtime.
 
-A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, where to get AreaDetector plugins from, where to get EPICS modules from, where CS-Studio is located, and which AD Plugins/EPICS modules to use and which versions are being used.
+A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, where to get AreaDetector plugins from, where to get EPICS modules from, where CS-Studio is located, and which AD Plugins/EPICS modules to use and which versions are being used. **The (relative or absolute) path to the config file can be used as a command line argument to any of the component scripts (including run.sh)** and will be prompted for otherwise.
 
 **For the script to work properly:**
 * All AreaDetector plugins must be in the same folder
