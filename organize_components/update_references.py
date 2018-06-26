@@ -72,7 +72,7 @@ def cross_reference(opi_dir):
                                         ver = str(folders[len(folders) - 2])
                                         done = True
                                         break
-                            if plugin == "":
+                            if plugin == "" and ad_dir != epics_dir:
                                 for top, dirs, filenames in os.walk(epics_dir):
                                     if done:
                                         break
