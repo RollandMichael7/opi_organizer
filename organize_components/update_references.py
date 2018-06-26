@@ -18,6 +18,9 @@ unidentifiedFiles_dict = {
     # filename : path/to/file
 }
 
+epics_dir = ""
+ad_dir = ""
+
 # given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
     for root, folders, files in os.walk(opi_dir):
@@ -56,7 +59,7 @@ def cross_reference(opi_dir):
                             if search is not None:
                                 after = search.group(1)
                             done = False
-                            for top, dirs, filenames in os.walk(opi_dir):
+                            for top, dirs, filenames in os.walk(ad_dir):
                                 if done:
                                     break
                                 for filename in filenames:
@@ -70,7 +73,21 @@ def cross_reference(opi_dir):
                                         done = True
                                         break
                             if plugin == "":
-                                sys.stderr.write("Could not identify reference. Left unchanged")
+                                for top, dirs, filenames in os.walk(epics_dir):
+                                    if done:
+                                        break
+                                    for filename in filenames:
+                                        if filename == path:
+                                            folders = os.path.join(top, filename)
+                                            folders = folders.split(os.sep)
+                                            pluginType = str(folders[len(folders) - 4])
+                                            # sys.stderr.write("type: " + pluginType + "\n")
+                                            plugin = str(folders[len(folders) - 3])
+                                            ver = str(folders[len(folders) - 2])
+                                            done = True
+                                            break
+                            if plugin == "":
+                                sys.stderr.write("Could not identify reference. Left unchanged\n")
                             else:
                                 if plugin != tag:
                                     line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
@@ -110,9 +127,6 @@ config_path = ""
 foundOPI_AD = False
 foundOPI_EPICS = False
 
-ad_opi_directory = ""
-epics_opi_directory = ""
-
 while response != 'y' and response != 'n':
     response = input("Use config file? (y/n) ").lower()
 if response == 'y':
@@ -125,38 +139,38 @@ if response == 'y':
             continue
         search = re.search("AD_OPI_DIRECTORY : (.*)", line)
         if search is not None and not foundOPI_AD:
-            ad_opi_directory = search.group(1)
-            if os.path.isdir(ad_opi_directory):
-                print("AreaDetector OPI directory: " + ad_opi_directory)
+            ad_dir = search.group(1)
+            if os.path.isdir(ad_dir):
+                print("AreaDetector OPI directory: " + ad_dir)
                 foundOPI_AD = True
             else:
-                print("AreaDetector OPI directory is invalid: " + ad_opi_directory)
-                ad_opi_directory = ""
+                print("AreaDetector OPI directory is invalid: " + ad_dir)
+                ad_dir = ""
             continue
         search = re.search("EPICS_OPI_DIRECTORY : (.*)", line)
         if search is not None and not foundOPI_EPICS:
-            epics_opi_directory = search.group(1)
-            if os.path.isdir(epics_opi_directory):
-                print("EPICS OPI directory: " + epics_opi_directory)
+            epics_dir = search.group(1)
+            if os.path.isdir(epics_dir):
+                print("EPICS OPI directory: " + epics_dir)
                 foundOPI_EPICS = True
             else:
-                print("EPICS OPI directory is invalid: " + epics_opi_directory)
-                epics_opi_directory = ""
+                print("EPICS OPI directory is invalid: " + epics_dir)
+                epics_dir = ""
             continue
 
 # get directory paths
 if not foundOPI_AD:
-    ad_opi_directory = ""
+    ad_dir = ""
     while not os.path.isdir(ad_opi_directory):
-        ad_opi_directory = input("Enter path to target AreaDetector OPI directory: ")
+        ad_dir = input("Enter path to target AreaDetector OPI directory: ")
 
 if not foundOPI_EPICS:
-    epics_opi_directory = ""
+    epics_dir = ""
     while not os.path.isdir(epics_opi_directory):
-        epics_opi_directory = input("Enter path to target EPICS modules OPI directory: ")
+        epics_dir = input("Enter path to target EPICS modules OPI directory: ")
 
-cross_reference(ad_opi_directory)
-cross_reference(epics_opi_directory)
+cross_reference(ad_dir)
+cross_reference(epics_dir)
 print("Operation complete.")
 
 # print the path to any unidentified files that were found (and thus left untouched)
