@@ -1,12 +1,17 @@
-# opi_organizer
-A python script that converts a flat directory of AreaDetector Control System Studio OPI files into a hierarchical structure, sub-dividing by plugin and version. Aditionally, updates the cross-references of plugin OPIs so that they don't break in the new directory.
+# opi_organizer #
 
-If the user has CS Studio installed, the "robust" version of the script also uses the adl2boy feature to convert MEDM adl files into opi files and places them in their appropriate place in the new directory.
+**OPI Organizer has been split into several "component" scripts which are called in succession by the run.sh bash script.** Two of the components are convert_and_organize_ad.py and convert_and_organize_epics.py which take directories of either AreaDetector plugins or EPICS modules and extract their ADL files, convert them into OPI files, and put them into a target OPI folder in a heirarchy organized by plugin/module and version. In doing so, these scripts require a path to a CS-Studio executable which can perform this conversion. The third component is update_references.py which takes the files sorted by the other two scripts **(the OPIs *must* be in that organization for this script to work)** and updates their references to other OPIs to function in this new directory structure; in doing this, it uses macros (and default values based on the current directory) such that the version of a linked plugin can be chosen at runtime.
 
-**The functions of OPI Organizer have been split into two scripts: convert_and_organize which converts ADL files into OPIs and organzes them, and update_references which replace references to other OPIs with macros which can be used to select which version of a plugin the user wants to link to at runtime.**
+A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, where to get AreaDetector plugins from, where to get EPICS modules from, where CS-Studio is located, and which AD Plugins/EPICS modules to use and which versions are being used.
 
-A config file can be used to give a path to the local OPI folder, a path to the local Area Detector directory, a path to the CS Studio executable, and a list of plugins (and, if necessary, their versions) to register in the organization.
+**For the script to work properly:**
+* All AreaDetector plugins must be in the same folder
+* All EPICS modules must be in the same folder
+* The folders for the EPICS modules OPIs and the AreaDetector OPIs must be in the same folder
+* Update_references.py must be run after/with directories created by the other two components
+* The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
 
+# The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better. #
 ## Slim ##
 Organize Slim only looks at OPI files already put into an OPI folder, automatically converting a "flat" directory into an heirarchial directory. However, if a plugin's name is not in the OPI's name (such as ADBruker's BIS.opi) then the script does not know where to put it unless told by the user.
 
