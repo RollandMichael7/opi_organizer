@@ -24,6 +24,7 @@ mkdir -p sscan/sscanApp
 cp --parents -r -n $BASE/bin ./base
 
 cp -r -n $CORE/bin ./areaDetector/ADCore
+cp -r -n $CORE/lib ./areaDetector/ADCore
 cp -r -n $CORE/db ./areaDetector/ADCore
 cp -r -n $CORE/documentation ./areaDetector/ADCore
 cp -r -n $CORE/iocBoot ./areaDetector/ADCore
@@ -34,6 +35,7 @@ cp -r -n $CORE/ADApp/op ./areaDetector/ADCore/ADApp
 cp -r -n $EPICS/asyn/bin ./asyn
 cp -r -n $EPICS/asyn/db ./asyn
 cp -r -n $EPICS/asyn/opi ./asyn
+cp -r -n $EPICS/asyn/lib ./asyn
 
 cp -r -n $EPICS/autosave/asApp/Db ./autosave/asApp
 cp -r -n $EPICS/autosave/asApp/op ./autosave/asApp
@@ -46,6 +48,7 @@ cp -r -n $EPICS/calc/calcApp/Db ./calc/calcApp
 cp -r -n $EPICS/calc/calcApp/op ./calc/calcApp
 
 cp -r -n $EPICS/devIocStats/bin ./devIocStats
+cp -r -n $EPICS/devIocStats/lib ./devIocStats
 cp -r -n $EPICS/devIocStats/db ./devIocStats
 cp -r -n $EPICS/devIocStats/op ./devIocStats
 
