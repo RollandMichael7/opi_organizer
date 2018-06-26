@@ -7,6 +7,7 @@
 
 import os
 import re
+import sys
 from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
