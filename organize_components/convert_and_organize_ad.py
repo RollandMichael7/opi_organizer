@@ -340,6 +340,13 @@ while len(matches) != 0 or start is True:
                         if verSearch is not None:
                             ver = verSearch.group(1)
                         break
+            if ver != "":
+                if match.startswith("AD"):
+                    plugin_dict[match[2:]] = [match, ver]
+                else:
+                    plugin_dict[match] = [match, ver]
+                print("Registered " + match + " " + ver)
+                continue
             response = ""
             plugin_list.append(match)
             release_path = ad_directory + os.sep + match + os.sep + "RELEASE.md"

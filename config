@@ -35,13 +35,13 @@ ADCSimDetector
 ADCameraLink
 ADDexela
 ADEiger
-ADFastCCD
+ADFastCCD : R1-0
 ADFireWireWin
 ADLambda : R1-0
 ADLightField
 ADMerlin
 ADMythen
-ADPCO
+ADPCO : R1-0
 ADPICam
 ADPSL
 ADPerkinElmer
@@ -52,7 +52,7 @@ ADPluginEdge
 ADPointGrey
 ADProsilica
 ADPvCam
-ADQImaging
+ADQImaging : R1-0
 ADRoper
 ADSimDetector
 ADSupport
@@ -64,8 +64,8 @@ ADnED : R1-0
 NDDriverStdArrays
 aravisGigE
 ffmpegServer
-ffmpegviewer
-firewireDCAM
+ffmpegViewer : R1-0
+firewireDCAM : R1-0
 pvaDriver
 
 # some EPICS modules

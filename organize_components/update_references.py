@@ -2,7 +2,7 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-06-22
+# version: 2018-06-26
 
 
 import os
@@ -18,14 +18,17 @@ unidentifiedFiles_dict = {
     # filename : path/to/file
 }
 
+epics_dir = ""
+ad_dir = ""
+
 # given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
     for root, folders, files in os.walk(opi_dir):
         for file in files:
             if file.endswith(".opi"):
-                macro_dict = {}
-                plugin = ""
-                ver = ""
+                macro_dict = {
+                    # plugin name : [plugin version, (areaDetector OR epics-modules)]
+                }
                 folders = os.path.join(root, file)
                 folders = folders.split(os.sep)
                 tag = str(folders[len(folders)-3])
@@ -33,8 +36,15 @@ def cross_reference(opi_dir):
                 sys.stderr.write("Editing " + file + ".\n")
                 for lineNum, line in enumerate(fileinput.input(os.path.join(root, file), inplace=True)):
                     # search for <opi_file> tag in the OPI
-                    if "<opi_file>" in line:
-                        path = re.search("<opi_file>(.*)</opi_file>", line)
+                    if "<opi_file>" in line or "<path>" in line:
+                        plugin = ""
+                        ver = ""
+                        pluginType = ""
+                        if "<opi_file>" in line:
+                            pathTag = "opi_file"
+                        else:
+                            pathTag = "path"
+                        path = re.search(pathTag + ">(.*)</" + pathTag + ">", line)
                         if path is not None:
                             before = ""
                             after = ""
@@ -42,32 +52,51 @@ def cross_reference(opi_dir):
                             if "$" in path:
                                continue
                             sys.stderr.write("line " + str(lineNum + 1) + ": " + line)
-                            search = re.search("(.*)<opi_file>", line)
+                            search = re.search("(.*)<" + pathTag + ">", line)
                             if search is not None:
                                 before = search.group(1)
-                            search = re.search("</opi_file>(.*)", line)
+                            search = re.search("</" + pathTag + ">(.*)", line)
                             if search is not None:
                                 after = search.group(1)
                             done = False
-                            for top, dirs, filenames in os.walk(opi_dir):
+                            for top, dirs, filenames in os.walk(ad_dir):
                                 if done:
                                     break
                                 for filename in filenames:
                                     if filename == path:
                                         folders = os.path.join(top, filename)
                                         folders = folders.split(os.sep)
+                                        pluginType = str(folders[len(folders) - 4])
+                                        # sys.stderr.write("type: " + pluginType + "\n")
                                         plugin = str(folders[len(folders) - 3])
                                         ver = str(folders[len(folders) - 2])
                                         done = True
                                         break
-                            if plugin != tag:
-                                line = before + "<opi_file>" + "$(path" + plugin + ")" + os.sep + \
-                                       path + "</opi_file>" + after + "\n"
-                                if plugin not in macro_dict.keys():
-                                    macro_dict[plugin] = ver
-                                sys.stderr.write("converted to: " + line)
+                            if plugin == "" and ad_dir != epics_dir:
+                                for top, dirs, filenames in os.walk(epics_dir):
+                                    if done:
+                                        break
+                                    for filename in filenames:
+                                        if filename == path:
+                                            folders = os.path.join(top, filename)
+                                            folders = folders.split(os.sep)
+                                            pluginType = str(folders[len(folders) - 4])
+                                            # sys.stderr.write("type: " + pluginType + "\n")
+                                            plugin = str(folders[len(folders) - 3])
+                                            ver = str(folders[len(folders) - 2])
+                                            done = True
+                                            break
+                            if plugin == "":
+                                sys.stderr.write("Could not identify reference. Left unchanged\n")
                             else:
-                                sys.stderr.write("Reference to same plugin left unchanged\n\n")
+                                if plugin != tag and plugin != "" and tag != "":
+                                    line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
+                                           path + "</" + pathTag + ">" + after + "\n"
+                                    if plugin not in macro_dict.keys():
+                                        macro_dict[plugin] = [ver, pluginType]
+                                    sys.stderr.write("converted to: " + line)
+                                else:
+                                    sys.stderr.write("Reference to same plugin left unchanged\n")
                     print(line, end="")
                 print("References updated.")
                 if len(macro_dict.keys()) > 0:
@@ -83,8 +112,10 @@ def add_macros(filePath, macros):
             macro_str = ""
             for macro in macros.keys():
                 macro_str += "\t<" + "path" + macro + ">"
-                macro_str += ".." + os.sep + ".." + os.sep + macro + os.sep + macros[macro]
+                macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep + macro\
+                             + os.sep + macros[macro][0]
                 macro_str += "</" + "path" +  macro + ">" + "\n"
+                sys.stderr.write("Added macro: " + macro_str)
             line = line + macro_str
             done = True
         print(line, end="")
@@ -95,9 +126,6 @@ response = ""
 config_path = ""
 foundOPI_AD = False
 foundOPI_EPICS = False
-
-ad_opi_directory = ""
-epics_opi_directory = ""
 
 while response != 'y' and response != 'n':
     response = input("Use config file? (y/n) ").lower()
@@ -111,38 +139,38 @@ if response == 'y':
             continue
         search = re.search("AD_OPI_DIRECTORY : (.*)", line)
         if search is not None and not foundOPI_AD:
-            ad_opi_directory = search.group(1)
-            if os.path.isdir(ad_opi_directory):
-                print("AreaDetector OPI directory: " + ad_opi_directory)
+            ad_dir = search.group(1)
+            if os.path.isdir(ad_dir):
+                print("AreaDetector OPI directory: " + ad_dir)
                 foundOPI_AD = True
             else:
-                print("AreaDetector OPI directory is invalid: " + ad_opi_directory)
-                ad_opi_directory = ""
+                print("AreaDetector OPI directory is invalid: " + ad_dir)
+                ad_dir = ""
             continue
         search = re.search("EPICS_OPI_DIRECTORY : (.*)", line)
         if search is not None and not foundOPI_EPICS:
-            epics_opi_directory = search.group(1)
-            if os.path.isdir(epics_opi_directory):
-                print("EPICS OPI directory: " + epics_opi_directory)
+            epics_dir = search.group(1)
+            if os.path.isdir(epics_dir):
+                print("EPICS OPI directory: " + epics_dir)
                 foundOPI_EPICS = True
             else:
-                print("EPICS OPI directory is invalid: " + epics_opi_directory)
-                epics_opi_directory = ""
+                print("EPICS OPI directory is invalid: " + epics_dir)
+                epics_dir = ""
             continue
 
 # get directory paths
 if not foundOPI_AD:
-    ad_opi_directory = ""
+    ad_dir = ""
     while not os.path.isdir(ad_opi_directory):
-        ad_opi_directory = input("Enter path to target AreaDetector OPI directory: ")
+        ad_dir = input("Enter path to target AreaDetector OPI directory: ")
 
 if not foundOPI_EPICS:
-    epics_opi_directory = ""
+    epics_dir = ""
     while not os.path.isdir(epics_opi_directory):
-        epics_opi_directory = input("Enter path to target EPICS modules OPI directory: ")
+        epics_dir = input("Enter path to target EPICS modules OPI directory: ")
 
-cross_reference(ad_opi_directory)
-cross_reference(epics_opi_directory)
+cross_reference(ad_dir)
+cross_reference(epics_dir)
 print("Operation complete.")
 
 # print the path to any unidentified files that were found (and thus left untouched)
