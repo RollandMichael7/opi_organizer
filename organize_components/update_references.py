@@ -2,7 +2,7 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-06-22
+# version: 2018-06-26
 
 
 import os
@@ -23,9 +23,12 @@ def cross_reference(opi_dir):
     for root, folders, files in os.walk(opi_dir):
         for file in files:
             if file.endswith(".opi"):
-                macro_dict = {}
+                macro_dict = {
+                    # plugin name : [plugin version, (areaDetector OR epics-modules)]
+                }
                 plugin = ""
                 ver = ""
+                pluginType = ""
                 folders = os.path.join(root, file)
                 folders = folders.split(os.sep)
                 tag = str(folders[len(folders)-3])
@@ -56,6 +59,8 @@ def cross_reference(opi_dir):
                                     if filename == path:
                                         folders = os.path.join(top, filename)
                                         folders = folders.split(os.sep)
+                                        pluginType = str(folders[len(folders) - 4])
+                                        # sys.stderr.write("type: " + pluginType + "\n")
                                         plugin = str(folders[len(folders) - 3])
                                         ver = str(folders[len(folders) - 2])
                                         done = True
@@ -64,7 +69,7 @@ def cross_reference(opi_dir):
                                 line = before + "<opi_file>" + "$(path" + plugin + ")" + os.sep + \
                                        path + "</opi_file>" + after + "\n"
                                 if plugin not in macro_dict.keys():
-                                    macro_dict[plugin] = ver
+                                    macro_dict[plugin] = [ver, pluginType]
                                 sys.stderr.write("converted to: " + line)
                             else:
                                 sys.stderr.write("Reference to same plugin left unchanged\n\n")
@@ -83,8 +88,10 @@ def add_macros(filePath, macros):
             macro_str = ""
             for macro in macros.keys():
                 macro_str += "\t<" + "path" + macro + ">"
-                macro_str += ".." + os.sep + ".." + os.sep + macro + os.sep + macros[macro]
+                macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep + macro\
+                             + os.sep + macros[macro][0]
                 macro_str += "</" + "path" +  macro + ">" + "\n"
+                sys.stderr.write("Added macro: " + macro_str)
             line = line + macro_str
             done = True
         print(line, end="")
