@@ -59,7 +59,13 @@ def cross_reference(opi_dir):
                             if search is not None:
                                 after = search.group(1)
                             done = False
-                            for top, dirs, filenames in os.walk(ad_dir):
+                            if path.startswith("AD"):
+                                first = ad_dir
+                                second = epics_dir
+                            else:
+                                first = epics_dir
+                                second = ad_dir
+                            for top, dirs, filenames in os.walk(first):
                                 if done:
                                     break
                                 for filename in filenames:
@@ -73,7 +79,7 @@ def cross_reference(opi_dir):
                                         done = True
                                         break
                             if plugin == "" and ad_dir != epics_dir:
-                                for top, dirs, filenames in os.walk(epics_dir):
+                                for top, dirs, filenames in os.walk(second):
                                     if done:
                                         break
                                     for filename in filenames:
@@ -127,11 +133,15 @@ config_path = ""
 foundOPI_AD = False
 foundOPI_EPICS = False
 
-while response != 'y' and response != 'n':
-    response = input("Use config file? (y/n) ").lower()
-if response == 'y':
-    while not os.path.isfile(config_path):
-        config_path = input("Enter path to config file: ")
+if len(sys.argv) > 1:
+    config_path = sys.argv[1]
+else:
+    while response != 'y' and response != 'n':
+        response = input("Use config file? (y/n) ").lower()
+    if response == 'y':
+        while not os.path.isfile(config_path):
+            config_path = input("Enter path to config file: ")
+if config_path != "":
     for line in open(config_path):
         if foundOPI_AD and foundOPI_EPICS:
             break
@@ -161,12 +171,12 @@ if response == 'y':
 # get directory paths
 if not foundOPI_AD:
     ad_dir = ""
-    while not os.path.isdir(ad_opi_directory):
+    while not os.path.isdir(ad_dir):
         ad_dir = input("Enter path to target AreaDetector OPI directory: ")
 
 if not foundOPI_EPICS:
     epics_dir = ""
-    while not os.path.isdir(epics_opi_directory):
+    while not os.path.isdir(epics_dir):
         epics_dir = input("Enter path to target EPICS modules OPI directory: ")
 
 cross_reference(ad_dir)
