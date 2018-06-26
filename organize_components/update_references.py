@@ -59,7 +59,13 @@ def cross_reference(opi_dir):
                             if search is not None:
                                 after = search.group(1)
                             done = False
-                            for top, dirs, filenames in os.walk(ad_dir):
+                            if path.startswith("AD"):
+                                first = ad_dir
+                                second = epics_dir
+                            else:
+                                first = epics_dir
+                                second = ad_dir
+                            for top, dirs, filenames in os.walk(first):
                                 if done:
                                     break
                                 for filename in filenames:
@@ -73,7 +79,7 @@ def cross_reference(opi_dir):
                                         done = True
                                         break
                             if plugin == "" and ad_dir != epics_dir:
-                                for top, dirs, filenames in os.walk(epics_dir):
+                                for top, dirs, filenames in os.walk(second):
                                     if done:
                                         break
                                     for filename in filenames:
