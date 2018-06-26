@@ -69,14 +69,17 @@ def cross_reference(opi_dir):
                                         ver = str(folders[len(folders) - 2])
                                         done = True
                                         break
-                            if plugin != tag:
-                                line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
-                                       path + "</" + pathTag + ">" + after + "\n"
-                                if plugin not in macro_dict.keys():
-                                    macro_dict[plugin] = [ver, pluginType]
-                                sys.stderr.write("converted to: " + line)
+                            if plugin == "":
+                                sys.stderr.write("Could not identify reference. Left unchanged")
                             else:
-                                sys.stderr.write("Reference to same plugin left unchanged\n\n")
+                                if plugin != tag:
+                                    line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
+                                           path + "</" + pathTag + ">" + after + "\n"
+                                    if plugin not in macro_dict.keys():
+                                        macro_dict[plugin] = [ver, pluginType]
+                                    sys.stderr.write("converted to: " + line)
+                                else:
+                                    sys.stderr.write("Reference to same plugin left unchanged\n\n")
                     print(line, end="")
                 print("References updated.")
                 if len(macro_dict.keys()) > 0:
