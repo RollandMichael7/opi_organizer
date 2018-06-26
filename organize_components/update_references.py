@@ -29,9 +29,6 @@ def cross_reference(opi_dir):
                 macro_dict = {
                     # plugin name : [plugin version, (areaDetector OR epics-modules)]
                 }
-                plugin = ""
-                ver = ""
-                pluginType = ""
                 folders = os.path.join(root, file)
                 folders = folders.split(os.sep)
                 tag = str(folders[len(folders)-3])
@@ -40,11 +37,14 @@ def cross_reference(opi_dir):
                 for lineNum, line in enumerate(fileinput.input(os.path.join(root, file), inplace=True)):
                     # search for <opi_file> tag in the OPI
                     if "<opi_file>" in line or "<path>" in line:
+                        plugin = ""
+                        ver = ""
+                        pluginType = ""
                         if "<opi_file>" in line:
                             pathTag = "opi_file"
                         else:
                             pathTag = "path"
-                        path = re.search(pathTag + "(.*)</" + pathTag + ">", line)
+                        path = re.search(pathTag + ">(.*)</" + pathTag + ">", line)
                         if path is not None:
                             before = ""
                             after = ""
@@ -89,14 +89,14 @@ def cross_reference(opi_dir):
                             if plugin == "":
                                 sys.stderr.write("Could not identify reference. Left unchanged\n")
                             else:
-                                if plugin != tag:
+                                if plugin != tag and plugin != "" and tag != "":
                                     line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
                                            path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
                                         macro_dict[plugin] = [ver, pluginType]
                                     sys.stderr.write("converted to: " + line)
                                 else:
-                                    sys.stderr.write("Reference to same plugin left unchanged\n\n")
+                                    sys.stderr.write("Reference to same plugin left unchanged\n")
                     print(line, end="")
                 print("References updated.")
                 if len(macro_dict.keys()) > 0:
