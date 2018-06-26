@@ -284,16 +284,10 @@ while len(matches) != 0 or start is True:
                     if verSearch is not None:
                         ver = verSearch.group(1)
                     break
-            if found and ver == "":
-                while response != 'y' and response != 'n':
-                    response = input("Detected " + match + " but could not find version. Register and "
-                               "confirm version? (y/n) ").lower()
-                if response == 'y':
-                    ver = input("Enter version: ")
-            elif found:
+            if found and ver != "":
                 print("Registered " + match + " " + ver)
             plug2ver[match] = ver
-        if not found:
+        if ver == "":
             release_path = epics_directory + os.sep + match
             if os.path.isdir(release_path):
                 dirPath = os.path.abspath(release_path) + os.sep + ".git"
@@ -309,19 +303,27 @@ while len(matches) != 0 or start is True:
                     ver = verSearch.group(1)
                     # print("version: " + ver)
                     response = ""
-                    while response != 'y' and response != 'n':
-                        response = input("Register " + match + " " + ver + "? (y/n) ")
-                    if response == 'y':
+                    if not found:
+                        while response != 'y' and response != 'n':
+                            response = input("Register " + match + " " + ver + "? (y/n) ")
+                        if response == 'y':
+                            plug2ver[match] = ver
+                    else:
+                        print("Registered " + match + " " + ver)
                         plug2ver[match] = ver
                 else:
                     if output != "":
                         verSearch = re.search("(\d+.\d+.\d+)", output)
                     if verSearch is not None:
                         ver = verSearch.group(1)
-                        response = ""
-                        while response != 'y' and response != 'n':
-                            response = input("Register " + match + " " + ver + "? (y/n) ")
-                        if response == 'y':
+                        if not found:
+                            response = ""
+                            while response != 'y' and response != 'n':
+                                response = input("Register " + match + " " + ver + "? (y/n) ")
+                            if response == 'y':
+                                plug2ver[match] = ver
+                        else:
+                            print("Registered " + match + " " + ver)
                             plug2ver[match] = ver
                     else:
                         while response != 'y' and response != 'n':
