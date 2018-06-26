@@ -189,11 +189,15 @@ foundCSS = False
 opi_directory = ""
 epics_directory = ""
 
-while response != 'y' and response != 'n':
-    response = input("Use config file? (y/n) ").lower()
-if response == 'y':
-    while not os.path.isfile(config_path):
-        config_path = input("Enter path to config file: ")
+if len(sys.argv) > 1:
+    config_path = sys.argv[1]
+else:
+    while response != 'y' and response != 'n':
+        response = input("Use config file? (y/n) ").lower()
+    if response == 'y':
+        while not os.path.isfile(config_path):
+            config_path = input("Enter path to config file: ")
+if config_path != "":
     for line in open(config_path):
         if foundOPI and foundEPICS and foundCSS:
             break
