@@ -70,12 +70,12 @@ pvaDriver
 
 # some EPICS modules
 asyn : R4-33
-motor : R6-10-1
+motor : R6-10
 calc : R3-7
 autosave : R5-9
 lua : R1-2
 xxx : R5-8-4
-iocStats : R3.1.15
+iocStats : 3.1.15
 sscan : R2-11
 busy : R1-7
 quadEM : R9-1
