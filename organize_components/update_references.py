@@ -36,8 +36,12 @@ def cross_reference(opi_dir):
                 sys.stderr.write("Editing " + file + ".\n")
                 for lineNum, line in enumerate(fileinput.input(os.path.join(root, file), inplace=True)):
                     # search for <opi_file> tag in the OPI
-                    if "<opi_file>" in line:
-                        path = re.search("<opi_file>(.*)</opi_file>", line)
+                    if "<opi_file>" in line or "<path>" in line:
+                        if "<opi_file>" in line:
+                            pathTag = "opi_file"
+                        else:
+                            pathTag = "path"
+                        path = re.search(pathTag + "(.*)</" + pathTag + ">", line)
                         if path is not None:
                             before = ""
                             after = ""
@@ -45,10 +49,10 @@ def cross_reference(opi_dir):
                             if "$" in path:
                                continue
                             sys.stderr.write("line " + str(lineNum + 1) + ": " + line)
-                            search = re.search("(.*)<opi_file>", line)
+                            search = re.search("(.*)<" + pathTag + ">", line)
                             if search is not None:
                                 before = search.group(1)
-                            search = re.search("</opi_file>(.*)", line)
+                            search = re.search("</" + pathTag + ">(.*)", line)
                             if search is not None:
                                 after = search.group(1)
                             done = False
@@ -66,8 +70,8 @@ def cross_reference(opi_dir):
                                         done = True
                                         break
                             if plugin != tag:
-                                line = before + "<opi_file>" + "$(path" + plugin + ")" + os.sep + \
-                                       path + "</opi_file>" + after + "\n"
+                                line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
+                                       path + "</" + pathTag + ">" + after + "\n"
                                 if plugin not in macro_dict.keys():
                                     macro_dict[plugin] = [ver, pluginType]
                                 sys.stderr.write("converted to: " + line)
