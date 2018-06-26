@@ -165,12 +165,12 @@ if config_path != "":
 # get directory paths
 if not foundOPI_AD:
     ad_dir = ""
-    while not os.path.isdir(ad_opi_directory):
+    while not os.path.isdir(ad_dir):
         ad_dir = input("Enter path to target AreaDetector OPI directory: ")
 
 if not foundOPI_EPICS:
     epics_dir = ""
-    while not os.path.isdir(epics_opi_directory):
+    while not os.path.isdir(epics_dir):
         epics_dir = input("Enter path to target EPICS modules OPI directory: ")
 
 cross_reference(ad_dir)
