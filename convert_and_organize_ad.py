@@ -403,6 +403,8 @@ while len(matches) != 0 or start is True:
                                 response = input("Register " + match + " " + ver + "? (y/n) ")
                             if response == 'n':
                                 continue
+                        else:
+                            raise FileNotFoundError
                     except FileNotFoundError:
                         output = ""
                         verSearch = None
