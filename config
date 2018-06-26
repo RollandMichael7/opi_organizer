@@ -75,7 +75,41 @@ calc : R3-7
 autosave : R5-9
 lua : R1-2
 xxx : R5-8-4
-iocStats : 3.1.15
+iocStats : R3.1.15
 sscan : R2-11
 busy : R1-7
 quadEM : R9-1
+measComp
+alive
+stream
+camac
+softGlue
+vac
+std
+caputRecorder
+optics
+ip
+love
+mca
+dxp
+mrfioc2
+devlib2
+xspress3
+softGlueZynq
+vme
+modbus
+ipac
+quadEM
+tpmac
+pcas
+ip330
+dac128V
+ipUnidig
+transRecorder
+TRSIS
+ioczed
+TRGeneralStandards
+TRCore
+gtr
+symb
+MCoreUtils
