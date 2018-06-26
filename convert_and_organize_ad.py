@@ -3,13 +3,14 @@
 # This will break any references from an OPI of one plugin to an OPI of another (such as any reference to ADCore),
 # which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.06.22
+# version: 2018.06.26
 
 
 import os
 import re
 import fileinput
 import sys
+import subprocess
 from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
@@ -375,42 +376,37 @@ while len(matches) != 0 or start is True:
                                 if skip is True:
                                     print("Registered " + match + " " + plugin_ver)
                             break
-                if found is False:
-                    ver = ""
-                    if config_path != "":
-                        for line in open(config_path):
-                            if "#" in line:
-                                continue
-                            if match in line:
-                                verSearch = re.search(match + " : " + "(.*)", line)
-                                if verSearch is not None:
-                                    ver = verSearch.group(1)
-                                    break
-                    if ver == "":
-                        while response != 'y' and response != 'n':
-                            response = input("Detected " + match + " but could not find version. Register and "
-                                       "confirm version? (y/n) ").lower()
-                        if response == 'y':
-                            ver = input("Enter version: ")
-                        else:
-                            continue
+                if found is False and ver == "":
+                    while response != 'y' and response != 'n':
+                        response = input("Detected " + match + " but could not find version. Register and "
+                                   "confirm version? (y/n) ").lower()
+                    if response == 'y':
+                        ver = input("Enter version: ")
+                    else:
+                        continue
                     if match.startswith("AD"):
                         plugin_dict[match[2:]] = [match, ver]
                     else:
                         plugin_dict[match] = [match, ver]
-                    if skip is True:
-                        print("Registered " + match + " " + ver)
             except IOError:
                 release_path = ad_directory + os.sep + match
                 if os.path.isdir(release_path):
-                    if config_path != "":
-                        for line in open(config_path):
-                            if match in line:
-                                verSearch = re.search(match + " : " + "(.*)", line)
-                                if verSearch is not None:
-                                    ver = verSearch.group(1)
-                                    break
-                    if ver == "":
+                    dirPath = os.path.abspath(release_path) + os.sep + ".git"
+                    try:
+                        command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+                        output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+                        verSearch = re.search("(R\d+-\d+)", output)
+                        if verSearch is not None:
+                            ver = verSearch.group(1)
+                            response = ""
+                            while response != 'y' and response != 'n':
+                                response = input("Register " + match + " " + ver + "? (y/n) ")
+                            if response == 'n':
+                                continue
+                    except FileNotFoundError:
+                        output = ""
+                        verSearch = None
+                        print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
                         while response != 'y' and response != 'n':
                             response = input("Detected " + match + " but could not find version. Register and "
                                        "confirm version? (y/n) ").lower()
@@ -422,8 +418,6 @@ while len(matches) != 0 or start is True:
                         plugin_dict[match[2:]] = [match, ver]
                     else:
                         plugin_dict[match] = [match, ver]
-                    if skip is True:
-                        print("Registered " + match + " " + ver)
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
