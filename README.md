@@ -5,10 +5,11 @@
 A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, where to get AreaDetector plugins from, where to get EPICS modules from, where CS-Studio is located, and which AD Plugins/EPICS modules to use and which versions are being used.
 
 **For the script to work properly:**
-  ..*All AreaDetector plugins must be in the same folder
-  ..*All EPICS modules must be in the same folder
-  ..*The folders for the EPICS modules OPIs and the AreaDetector OPIs must be in the same folder
-  ..*The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended. https://ics-web.sns.ornl.gov/css/products.html
+* All AreaDetector plugins must be in the same folder
+* All EPICS modules must be in the same folder
+* The folders for the EPICS modules OPIs and the AreaDetector OPIs must be in the same folder
+* Update_references.py must be run after/with directories created by the other two components
+* The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
 
 # The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better. #
 ## Slim ##
