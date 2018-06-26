@@ -7,6 +7,7 @@ A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, 
 **For the script to work properly:**
 * All AreaDetector plugins must be in the same folder
 * All EPICS modules must be in the same folder
+* Folders containing modules and plugins must have the **same exact name as the github repo they come from, OR the github repo's name must be a substring of the local folder's name and the module/plugin must be marked in the config file with a version.**
 * The folders for the EPICS modules OPIs and the AreaDetector OPIs must be in the same folder
 * Update_references.py must be run after/with directories created by the other two components
 * The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
