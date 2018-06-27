@@ -95,14 +95,15 @@ def cross_reference(opi_dir):
                             if plugin == "":
                                 sys.stderr.write("Could not identify reference. Left unchanged\n")
                             else:
+                                plugin = plugin.capitalize()
                                 if plugin != tag and plugin != "" and tag != "":
                                     line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
                                            path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
                                         if opi_dir == ad_dir:
-                                            macro_dict[plugin.capitalize()] = [ver, pluginType, True]
+                                            macro_dict[plugin] = [ver, pluginType, True]
                                         else:
-                                            macro_dict[plugin.capitalize()] = [ver, pluginType, False]
+                                            macro_dict[plugin] = [ver, pluginType, False]
                                     sys.stderr.write("converted to: " + line)
                                 else:
                                     sys.stderr.write("Reference to same plugin left unchanged\n")
