@@ -95,10 +95,9 @@ def cross_reference(opi_dir):
                             if plugin == "":
                                 sys.stderr.write("Could not identify reference. Left unchanged\n")
                             else:
-                                plugin = plugin.capitalize()
                                 if plugin != tag and plugin != "" and tag != "":
-                                    line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
-                                           path + "</" + pathTag + ">" + after + "\n"
+                                    line = before + "<" + pathTag + ">" + "$(path" + plugin[:1].upper() + plugin[1:] + \
+                                           ")" + os.sep + path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
                                         if opi_dir == ad_dir:
                                             macro_dict[plugin] = [ver, pluginType, True]
@@ -122,12 +121,12 @@ def add_macros(filePath, macros):
             macro_str = ""
             for macro in macros.keys():
                 isADet = macros[macro][2]
-                macro_str += "\t<" + "path" + macro + ">"
+                macro_str += "\t<" + "path" + macro[:1].upper() + macro[1:] + ">"
                 if isADet:
                     macro_str += ".." + os.sep
                 macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
                              + macro + os.sep + macros[macro][0]
-                macro_str += "</" + "path" +  macro + ">" + "\n"
+                macro_str += "</" + "path" +  macro[:1].capitalize() + macro[1:] + ">" + "\n"
                 sys.stderr.write("Added macro: " + macro_str)
             line = line + macro_str
             done = True
