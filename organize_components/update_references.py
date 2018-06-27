@@ -27,7 +27,10 @@ def cross_reference(opi_dir):
         for file in files:
             if file.endswith(".opi"):
                 macro_dict = {
-                    # plugin name : [plugin version, (areaDetector OR epics-modules), isADet]
+                    # plugin name : [plugin version, (areaDetector OR epics-modules), isADet, isLinkToEpics]
+                    # isADet: True iff the plugin being updated is part of an AreaDetector plugin
+                    # isLinkToEpics: True iff the plugin being updated is part of an AreaDetector plugin
+                    #                AND the OPI being linked to is part of an EPICS module
                 }
                 folders = os.path.join(root, file)
                 folders = folders.split(os.sep)
@@ -40,6 +43,7 @@ def cross_reference(opi_dir):
                         plugin = ""
                         ver = ""
                         pluginType = ""
+                        foundIn = ""
                         if "<opi_file>" in line:
                             pathTag = "opi_file"
                         else:
@@ -77,6 +81,7 @@ def cross_reference(opi_dir):
                                         plugin = str(folders[len(folders) - 3])
                                         ver = str(folders[len(folders) - 2])
                                         done = True
+                                        foundIn = first
                                         break
                             if plugin == "" and ad_dir != epics_dir:
                                 for top, dirs, filenames in os.walk(second):
@@ -91,6 +96,7 @@ def cross_reference(opi_dir):
                                             plugin = str(folders[len(folders) - 3])
                                             ver = str(folders[len(folders) - 2])
                                             done = True
+                                            foundIn = second
                                             break
                             if plugin == "":
                                 sys.stderr.write("Could not identify reference. Left unchanged\n")
@@ -100,9 +106,14 @@ def cross_reference(opi_dir):
                                            ")" + os.sep + path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
                                         if opi_dir == ad_dir:
-                                            macro_dict[plugin] = [ver, pluginType, True]
+                                            isADet = True
                                         else:
-                                            macro_dict[plugin] = [ver, pluginType, False]
+                                            isADet = False
+                                        if isADet and foundIn == epics_dir:
+                                            isLinkToEpics = True
+                                        else:
+                                            isLinkToEpics = False
+                                        macro_dict[plugin] = [ver, pluginType, isADet, isLinkToEpics]
                                     sys.stderr.write("converted to: " + line)
                                 else:
                                     sys.stderr.write("Reference to same plugin left unchanged\n")
@@ -121,8 +132,9 @@ def add_macros(filePath, macros):
             macro_str = ""
             for macro in macros.keys():
                 isADet = macros[macro][2]
+                isLinkToEpics = macros[macro][3]
                 macro_str += "\t<" + "path" + macro[:1].upper() + macro[1:] + ">"
-                if isADet:
+                if isADet and isLinkToEpics:
                     macro_str += ".." + os.sep
                 macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
                              + macro + os.sep + macros[macro][0]
