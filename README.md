@@ -8,13 +8,34 @@ A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, 
 * All AreaDetector plugins must be in the same folder
 * All EPICS modules must be in the same folder
 * Folders containing modules and plugins must have the **same exact name as the github repo they come from, OR the github repo's name must be a substring of the local folder's name and the module/plugin must be marked in the config file with a version.**
-* The folders for the EPICS modules OPIs and the AreaDetector OPIs must be in the same folder
 * Update_references.py must be run after/with directories created by the other two components
 * The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
 
-# The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better. #
-## Slim ##
+The overall OPI structure must look something like this for the updated references to work (folder names are arbitrary):
+
+```
+-AreaDetector (or some other name)
+---R3-3 (or some other version)
+-----ADCore (or some other plugin)
+-------R3-3 (or some other version)
+---------something.opi
+        
+-Epics (or some other name)
+---asyn (or some other module)
+-----R4-33 (or some other version)
+-------something.opi
+```
+
+**The parent folder for AreaDetector plugins must be on the same level as the EPICS modules folder, and the AreaDetector plugin folders must be two levels below the parent AD folder.** The rest of the structure will be created by the script. The config options for this example would be:
+
+```
+AD_OPI_DIRECTORY = /home/AreaDetector/R3-3
+EPICS_OPI_DIRECTORY = /home/Epics
+```
+
+## The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better. ##
+### Slim ###
 Organize Slim only looks at OPI files already put into an OPI folder, automatically converting a "flat" directory into an heirarchial directory. However, if a plugin's name is not in the OPI's name (such as ADBruker's BIS.opi) then the script does not know where to put it unless told by the user.
 
-## Robust ##
+### Robust ###
 Organize Robust searches an entire local Area Detector directory for OPI files, inserting them into the given OPI directory accordingly (in addition to organizing the OPI directory in the same way as Slim). It can also use CS Studio to convert MEDM adl files from the Area Detector directory to create new OPI files and organize them.
