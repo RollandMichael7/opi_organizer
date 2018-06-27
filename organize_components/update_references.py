@@ -2,7 +2,7 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-06-26
+# version: 2018-06-27
 
 
 import os
@@ -27,7 +27,7 @@ def cross_reference(opi_dir):
         for file in files:
             if file.endswith(".opi"):
                 macro_dict = {
-                    # plugin name : [plugin version, (areaDetector OR epics-modules)]
+                    # plugin name : [plugin version, (areaDetector OR epics-modules), isADet]
                 }
                 folders = os.path.join(root, file)
                 folders = folders.split(os.sep)
@@ -99,7 +99,10 @@ def cross_reference(opi_dir):
                                     line = before + "<" + pathTag + ">" + "$(path" + plugin + ")" + os.sep + \
                                            path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
-                                        macro_dict[plugin] = [ver, pluginType]
+                                        if opi_dir == ad_dir:
+                                            macro_dict[plugin] = [ver, pluginType, True]
+                                        else:
+                                            macro_dict[plugin] = [ver, pluginType, False]
                                     sys.stderr.write("converted to: " + line)
                                 else:
                                     sys.stderr.write("Reference to same plugin left unchanged\n")
@@ -117,9 +120,12 @@ def add_macros(filePath, macros):
         if "<macros>" in line and not done:
             macro_str = ""
             for macro in macros.keys():
+                isADet = macros[macro][2]
                 macro_str += "\t<" + "path" + macro + ">"
-                macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep + macro\
-                             + os.sep + macros[macro][0]
+                if isADet:
+                    macro_str += ".." + os.sep
+                macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
+                             + macro + os.sep + macros[macro][0]
                 macro_str += "</" + "path" +  macro + ">" + "\n"
                 sys.stderr.write("Added macro: " + macro_str)
             line = line + macro_str
