@@ -15,7 +15,7 @@ The overall OPI structure must look something like this for the updated referenc
 
 ```
 -AreaDetector (or some other name)
----R3-3 (or some other version)
+---R3-3 (or some other name)
 -----ADCore (or some other plugin)
 -------R3-3 (or some other version)
 ---------something.opi
@@ -26,7 +26,7 @@ The overall OPI structure must look something like this for the updated referenc
 -------something.opi
 ```
 
-**The parent folder for AreaDetector plugins must be on the same level as the EPICS modules folder, and the AreaDetector plugin folders must be two levels below the parent AD folder.** The rest of the structure will be created by the script. The config options for this example would be:
+**The parent folder for AreaDetector plugins must be on the same level as the EPICS modules folder, and the target AreaDetector OPI folder must be one level below the parent AD folder.** The rest of the structure will be created by the script. The config options for this example would be:
 
 ```
 AD_OPI_DIRECTORY = /home/AreaDetector/R3-3
