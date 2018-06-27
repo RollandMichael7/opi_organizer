@@ -29,8 +29,8 @@ The overall OPI structure must look something like this for the updated referenc
 **The parent folder for AreaDetector OPIs must be on the same level as the target EPICS OPI folder, and the target AreaDetector OPI folder must be one level below the parent AD folder.** The rest of the structure will be created by the script. The config options for this example would be:
 
 ```
-AD_OPI_DIRECTORY = /home/AreaDetector/R3-3
-EPICS_OPI_DIRECTORY = /home/Epics
+AD_OPI_DIRECTORY : /home/AreaDetector/R3-3
+EPICS_OPI_DIRECTORY : /home/Epics
 ```
 
 The locations of the actual EPICS modules and AreaDetector plugins have no restrictions.
