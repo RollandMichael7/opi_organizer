@@ -158,6 +158,7 @@ forced = False
 
 parser = argparse.ArgumentParser(description="Update references between OPI files")
 parser.add_argument('-f', dest='config_path', help="Bypass confirmation prompts. Requires a path to a config file")
+parser.add_argument('config', nargs='?', default="")
 parsed_args = parser.parse_args()
 
 if parsed_args.config_path is not None:
@@ -166,10 +167,13 @@ if parsed_args.config_path is not None:
         print("Invalid path: " + config_path)
         exit()
     forced = True
+elif parsed_args.config != "":
+    config_path = parsed_args.config
+    if not os.path.isfile(config_path):
+        print("Invalid path: " + config_path)
+        config_path = ""
 
-if len(sys.argv) > 1 and not forced:
-    config_path = sys.argv[1]
-elif config_path == "":
+if config_path == "":
     while response != 'y' and response != 'n':
         response = input("Use config file? (y/n) ").lower()
     if response == 'y':
