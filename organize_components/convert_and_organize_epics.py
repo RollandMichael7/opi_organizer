@@ -201,6 +201,9 @@ foundEPICS = False
 foundCSS = False
 forced = False
 
+epics_directory = ""
+opi_directory = ""
+
 parser = argparse.ArgumentParser(description="Convert EPICS modules ADL files into OPIs and organize them.")
 parser.add_argument('-f', dest='config_path', help="Bypass confirmation prompts. Requires a path to a config file")
 parser.add_argument('config', nargs='?', default="", help="Path to a config file.")

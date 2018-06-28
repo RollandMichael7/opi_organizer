@@ -4,7 +4,7 @@
 # author: Michael Rolland
 # version: 2018-06-28
 
-
+import glob
 import os
 import re
 import fileinput
@@ -66,42 +66,62 @@ def cross_reference(opi_dir):
                             search = re.search("</" + pathTag + ">(.*)", line)
                             if search is not None:
                                 after = search.group(1)
-                            done = False
                             if path.startswith("AD"):
                                 first = ad_dir
                                 second = epics_dir
                             else:
                                 first = epics_dir
                                 second = ad_dir
-                            for top, dirs, filenames in os.walk(first):
-                                if done:
-                                    break
-                                for filename in filenames:
-                                    if filename == path:
-                                        folders = os.path.join(top, filename)
-                                        folders = folders.split(os.sep)
-                                        pluginType = str(folders[len(folders) - 4])
-                                        # sys.stderr.write("type: " + pluginType + "\n")
-                                        plugin = str(folders[len(folders) - 3])
-                                        ver = str(folders[len(folders) - 2])
-                                        done = True
-                                        foundIn = first
-                                        break
-                            if plugin == "" and ad_dir != epics_dir:
-                                for top, dirs, filenames in os.walk(second):
-                                    if done:
-                                        break
-                                    for filename in filenames:
-                                        if filename == path:
-                                            folders = os.path.join(top, filename)
-                                            folders = folders.split(os.sep)
-                                            pluginType = str(folders[len(folders) - 4])
-                                            # sys.stderr.write("type: " + pluginType + "\n")
-                                            plugin = str(folders[len(folders) - 3])
-                                            ver = str(folders[len(folders) - 2])
-                                            done = True
-                                            foundIn = second
-                                            break
+                            matches = glob.glob(os.path.abspath(first) + os.sep + "**" + os.sep + path, recursive=True)
+                            if len(matches) != 0:
+                                folders = os.path.abspath(matches[0])
+                                folders = folders.split(os.sep)
+                                pluginType = str(folders[len(folders) - 4])
+                                # sys.stderr.write("type: " + pluginType + "\n")
+                                plugin = str(folders[len(folders) - 3])
+                                ver = str(folders[len(folders) - 2])
+                                foundIn = first
+                            else:
+                                matches = glob.glob(os.path.abspath(second) + os.sep + "**" + os.sep + path, recursive=True)
+                                if len(matches) != 0:
+                                    folders = os.path.abspath(matches[0])
+                                    folders = folders.split(os.sep)
+                                    pluginType = str(folders[len(folders) - 4])
+                                    # sys.stderr.write("type: " + pluginType + "\n")
+                                    plugin = str(folders[len(folders) - 3])
+                                    ver = str(folders[len(folders) - 2])
+                                    foundIn = second
+                                else:
+                                    sys.stderr.write("we aint found shit!\n")
+                            # for top, dirs, filenames in os.walk(first):
+                            #     if done:
+                            #         break
+                            #     for filename in filenames:
+                            #         if filename == path:
+                            #             folders = os.path.join(top, filename)
+                            #             folders = folders.split(os.sep)
+                            #             pluginType = str(folders[len(folders) - 4])
+                            #             # sys.stderr.write("type: " + pluginType + "\n")
+                            #             plugin = str(folders[len(folders) - 3])
+                            #             ver = str(folders[len(folders) - 2])
+                            #             done = True
+                            #             foundIn = first
+                            #             break
+                            # if plugin == "" and ad_dir != epics_dir:
+                            #     for top, dirs, filenames in os.walk(second):
+                            #         if done:
+                            #             break
+                            #         for filename in filenames:
+                            #             if filename == path:
+                            #                 folders = os.path.join(top, filename)
+                            #                 folders = folders.split(os.sep)
+                            #                 pluginType = str(folders[len(folders) - 4])
+                            #                 # sys.stderr.write("type: " + pluginType + "\n")
+                            #                 plugin = str(folders[len(folders) - 3])
+                            #                 ver = str(folders[len(folders) - 2])
+                            #                 done = True
+                            #                 foundIn = second
+                            #                 break
                             if plugin == "":
                                 sys.stderr.write("Could not identify reference. Left unchanged\n")
                             else:
@@ -143,7 +163,7 @@ def add_macros(filePath, macros):
                 macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
                              + macro + os.sep + macros[macro][0]
                 macro_str += "</" + "path" +  macro[:1].capitalize() + macro[1:] + ">" + "\n"
-                sys.stderr.write("Added macro: " + macro_str)
+            sys.stderr.write("Added macros: " + macro_str)
             line = line + macro_str
             done = True
         print(line, end="")
