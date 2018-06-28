@@ -201,9 +201,9 @@ foundEPICS = False
 foundCSS = False
 forced = False
 
-parser = argparse.ArgumentParser(description="Update references between OPI files")
+parser = argparse.ArgumentParser(description="Convert EPICS modules ADL files into OPIs and organize them.")
 parser.add_argument('-f', dest='config_path', help="Bypass confirmation prompts. Requires a path to a config file")
-parser.add_argument('config', nargs='?', default="")
+parser.add_argument('config', nargs='?', default="", help="Path to a config file.")
 parsed_args = parser.parse_args()
 
 if parsed_args.config_path is not None:
