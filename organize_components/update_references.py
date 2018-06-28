@@ -4,7 +4,7 @@
 # author: Michael Rolland
 # version: 2018-06-28
 
-
+import glob
 import os
 import re
 import fileinput
@@ -21,6 +21,10 @@ unidentifiedFiles_dict = {
 
 epics_dir = ""
 ad_dir = ""
+
+ref2path = {
+    # something.opi : [/path/to/something.opi, epics_opi_dir or ad_opi_dir]
+}
 
 # given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
@@ -66,45 +70,55 @@ def cross_reference(opi_dir):
                             search = re.search("</" + pathTag + ">(.*)", line)
                             if search is not None:
                                 after = search.group(1)
-                            done = False
-                            if path.startswith("AD"):
-                                first = ad_dir
-                                second = epics_dir
+                            if path in ref2path.keys():
+                                folders = ref2path[path][0]
+                                folders = folders.split(os.sep)
+                                pluginType = str(folders[len(folders) - 4])
+                                plugin = str(folders[len(folders) - 3])
+                                ver = str(folders[len(folders) - 2])
+                                foundIn = ref2path[path][1]
                             else:
-                                first = epics_dir
-                                second = ad_dir
-                            for top, dirs, filenames in os.walk(first):
-                                if done:
-                                    break
-                                for filename in filenames:
-                                    if filename == path:
-                                        folders = os.path.join(top, filename)
-                                        folders = folders.split(os.sep)
-                                        pluginType = str(folders[len(folders) - 4])
-                                        # sys.stderr.write("type: " + pluginType + "\n")
-                                        plugin = str(folders[len(folders) - 3])
-                                        ver = str(folders[len(folders) - 2])
-                                        done = True
-                                        foundIn = first
-                                        break
-                            if plugin == "" and ad_dir != epics_dir:
-                                for top, dirs, filenames in os.walk(second):
+                                done = False
+                                if path.startswith("AD"):
+                                    first = ad_dir
+                                    second = epics_dir
+                                else:
+                                    first = epics_dir
+                                    second = ad_dir
+                                for top, dirs, filenames in os.walk(first):
                                     if done:
                                         break
                                     for filename in filenames:
                                         if filename == path:
                                             folders = os.path.join(top, filename)
+                                            ref2path[path] = [folders, first]
                                             folders = folders.split(os.sep)
                                             pluginType = str(folders[len(folders) - 4])
                                             # sys.stderr.write("type: " + pluginType + "\n")
                                             plugin = str(folders[len(folders) - 3])
                                             ver = str(folders[len(folders) - 2])
                                             done = True
-                                            foundIn = second
+                                            foundIn = first
                                             break
-                            if plugin == "":
-                                sys.stderr.write("Could not identify reference. Left unchanged\n")
-                            else:
+                                if plugin == "" and ad_dir != epics_dir:
+                                    for top, dirs, filenames in os.walk(second):
+                                        if done:
+                                            break
+                                        for filename in filenames:
+                                            if filename == path:
+                                                folders = os.path.join(top, filename)
+                                                ref2path[path] = [folders, second]
+                                                folders = folders.split(os.sep)
+                                                pluginType = str(folders[len(folders) - 4])
+                                                # sys.stderr.write("type: " + pluginType + "\n")
+                                                plugin = str(folders[len(folders) - 3])
+                                                ver = str(folders[len(folders) - 2])
+                                                done = True
+                                                foundIn = second
+                                                break
+                                if plugin == "":
+                                    sys.stderr.write("Could not identify reference. Left unchanged\n")
+                            if plugin != "":
                                 if plugin != tag and plugin != "" and tag != "":
                                     line = before + "<" + pathTag + ">" + "$(path" + plugin[:1].upper() + plugin[1:] + \
                                            ")" + os.sep + path + "</" + pathTag + ">" + after + "\n"
@@ -143,7 +157,7 @@ def add_macros(filePath, macros):
                 macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
                              + macro + os.sep + macros[macro][0]
                 macro_str += "</" + "path" +  macro[:1].capitalize() + macro[1:] + ">" + "\n"
-                sys.stderr.write("Added macro: " + macro_str)
+            sys.stderr.write("Added macros: " + macro_str)
             line = line + macro_str
             done = True
         print(line, end="")
