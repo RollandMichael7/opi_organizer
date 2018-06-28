@@ -4,18 +4,24 @@
 CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
 
 # used only by convert_and_organize_epics.py
-EPICS_DIRECTORY : C:\\Users\\mikes\\Documents\\EPICS
+    # EPICS_DIRECTORY : C:\\Users\\mikes\\Documents\\EPICS
+EPICS_DIRECTORY :
+
 # used by convert_and_organize_epics.py and update_references.py
-EPICS_OPI_DIRECTORY : C:\\Users\\mikes\Documents\\OPIs\\EPICS
+    # EPICS_OPI_DIRECTORY : C:\\Users\\mikes\Documents\\OPIs\\EPICS
+EPICS_OPI_DIRECTORY :
 
 # used only by convert_and_organize_ad.py
-AD_DIRECTORY : C:\\Users\\mikes\\Documents\\AreaDetector
+    # AD_DIRECTORY : C:\\Users\\mikes\\Documents\\AreaDetector
+AD_DIRECTORY :
+
 # used by convert_and_organize_ad.py and update_references.py
-AD_OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs\\ADet
+    # AD_OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs\\ADet\\R3-3
+AD_OPI_DIRECTORY :
 
 # used only by organize_robust.py and organize_slim.py
-OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
-
+    # OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
+OPI_DIRECTORY :
 
 # All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Remove any plugin you
 # do not want registered in the search.
@@ -73,23 +79,23 @@ pvaDriver
 
 # some EPICS modules
 # used by convert epics
-asyn : R4-33
-motor : R6-10
-calc : R3-7
-autosave : R5-9
-lua : R1-2
+asyn
+motor
+calc
+autosave
+lua
 xxx : R5-8-4
-iocStats : R3.1.15
-sscan : R2-11
-busy : R1-7
-quadEM : R9-1
+iocStats
+sscan
+busy
+quadEM
 measComp
 alive
 stream
 camac
 softGlue
 vac
-std
+std : R3-4-1
 caputRecorder
 optics
 ip
@@ -117,3 +123,5 @@ TRCore
 gtr
 symb
 MCoreUtils
+delaygen
+Yokogawa_DAS : R1-0
