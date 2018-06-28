@@ -342,7 +342,7 @@ while len(matches) != 0 or start is True:
                             response = input("Register " + match + " " + ver + "? (y/n) ")
                         if response == 'y':
                             plug2ver[match] = ver
-                    else:
+                    elif found:
                         print("Registered " + match + " " + ver)
                         plug2ver[match] = ver
                 else:
@@ -356,7 +356,7 @@ while len(matches) != 0 or start is True:
                                 response = input("Register " + match + " " + ver + "? (y/n) ")
                             if response == 'y':
                                 plug2ver[match] = ver
-                        else:
+                        elif found:
                             print("Registered " + match + " " + ver)
                             plug2ver[match] = ver
                     else:
