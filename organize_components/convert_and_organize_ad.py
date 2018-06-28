@@ -242,6 +242,9 @@ parsed_args = parser.parse_args()
 
 if parsed_args.config_path is not None:
     config_path = parsed_args.config_path
+    if not os.path.isfile(config_path):
+        print("Invalid path: " + config_path)
+        exit()
     forced = True
 
 if len(sys.argv) > 1 and not forced:

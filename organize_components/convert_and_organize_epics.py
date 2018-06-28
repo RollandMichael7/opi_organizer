@@ -207,6 +207,9 @@ parsed_args = parser.parse_args()
 
 if parsed_args.config_path is not None:
     config_path = parsed_args.config_path
+    if not os.path.isfile(config_path):
+        print("Invalid path: " + config_path)
+        exit()
     forced = True
 
 opi_directory = ""
@@ -368,7 +371,7 @@ if error is False:
     choice = ""
     substr = ""
     query = ""
-    while query != "done":
+    while query != "done" and not forced:
         response = ""
         choice = ""
         found = False
