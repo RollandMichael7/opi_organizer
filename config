@@ -76,6 +76,7 @@ ffmpegServer
 ffmpegViewer : R1-0
 firewireDCAM : R1-0
 pvaDriver
+ADSpinnaker
 
 # some EPICS modules
 # used by convert epics
