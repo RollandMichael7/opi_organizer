@@ -5,13 +5,15 @@ CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
 
 # used only by convert_and_organize_epics.py
 EPICS_DIRECTORY : C:\\Users\\mikes\\Documents\\EPICS
+# used by convert_and_organize_epics.py and update_references.py
 EPICS_OPI_DIRECTORY : C:\\Users\\mikes\Documents\\OPIs\\EPICS
 
 # used only by convert_and_organize_ad.py
 AD_DIRECTORY : C:\\Users\\mikes\\Documents\\AreaDetector
+# used by convert_and_organize_ad.py and update_references.py
 AD_OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs\\ADet
 
-# used only by organize_robust.py and organize_slim.py and update_references.py
+# used only by organize_robust.py and organize_slim.py
 OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
 
 
@@ -27,6 +29,7 @@ OPI_DIRECTORY : C:\\Users\\mikes\\Documents\\OPIs
 # <Plugin name> [: version]
 
 # AreaDetector plugins
+# used by robust, slim, and convert ad
 ADADSC
 ADAndor
 ADAndor3
@@ -69,6 +72,7 @@ firewireDCAM : R1-0
 pvaDriver
 
 # some EPICS modules
+# used by convert epics
 asyn : R4-33
 motor : R6-10
 calc : R3-7
