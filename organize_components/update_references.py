@@ -2,7 +2,7 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-06-27
+# version: 2018-06-28
 
 
 import os
@@ -10,6 +10,7 @@ import re
 import fileinput
 import sys
 import subprocess
+import argparse
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -23,6 +24,9 @@ ad_dir = ""
 
 # given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
+    if not os.path.isdir(opi_dir):
+        print("Invalid directory: " + opi_dir)
+        return
     for root, folders, files in os.walk(opi_dir):
         for file in files:
             if file.endswith(".opi"):
@@ -150,10 +154,19 @@ response = ""
 config_path = ""
 foundOPI_AD = False
 foundOPI_EPICS = False
+forced = False
 
-if len(sys.argv) > 1:
+parser = argparse.ArgumentParser(description="Update references between OPI files")
+parser.add_argument('-f', dest='config_path', help="Bypass confirmation prompts. Requires a path to a config file")
+parsed_args = parser.parse_args()
+
+if parsed_args.config_path is not None:
+    config_path = parsed_args.config_path
+    forced = True
+
+if len(sys.argv) > 1 and not forced:
     config_path = sys.argv[1]
-else:
+elif config_path == "":
     while response != 'y' and response != 'n':
         response = input("Use config file? (y/n) ").lower()
     if response == 'y':
@@ -187,12 +200,12 @@ if config_path != "":
             continue
 
 # get directory paths
-if not foundOPI_AD:
+if not foundOPI_AD and not forced:
     ad_dir = ""
     while not os.path.isdir(ad_dir):
         ad_dir = input("Enter path to target AreaDetector OPI directory: ")
 
-if not foundOPI_EPICS:
+if not foundOPI_EPICS and not forced:
     epics_dir = ""
     while not os.path.isdir(epics_dir):
         epics_dir = input("Enter path to target EPICS modules OPI directory: ")

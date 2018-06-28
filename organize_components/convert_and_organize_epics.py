@@ -2,12 +2,13 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.06.22
+# version: 2018.06.28
 
 
 import os
 import re
 import sys
+import argparse
 from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
@@ -31,7 +32,13 @@ css_path = ""
 
 
 # Convert MEDM adl files to BOY opi files using CS Studio, and store those files in the new directory
-def convert_adls(ad_dir, opi_dir):
+def convert_adls(epics_dir, opi_dir):
+    if not os.path.isdir(epics_dir):
+        print("Invalid directory: " + epics_dir)
+        return
+    if not os.path.isdir(opi_dir):
+        print("Invalid directory: " + opi_dir)
+        return
     # arguments used in executing CS Studio
     css_dict = {
         # /path/to/adl/file : [plugin name, plugin version]
@@ -39,7 +46,7 @@ def convert_adls(ad_dir, opi_dir):
     file2plug =  {
         # converted opi filename : [plugin name, plugin version, plugin key]
     }
-    for root, dirs, files in os.walk(ad_dir):
+    for root, dirs, files in os.walk(epics_dir):
         for file in files:
             if file.endswith(".adl"):
                 print(file)
@@ -104,10 +111,16 @@ def convert_adls(ad_dir, opi_dir):
 
 # given a directory of Area Detector files, construct a hierarchical directory that
 # groups OPIs into their respective plugins and versions
-def organize(ad_dir, opi_dir):
+def organize(epics_dir, opi_dir):
+    if not os.path.isdir(epics_dir):
+        print("Invalid directory: " + epics_dir)
+        return
+    if not os.path.isdir(opi_dir):
+        print("Invalid directory: " + opi_dir)
+        return
     ver = ""
     dirName = ""
-    for root, dirs, files in os.walk(ad_dir):
+    for root, dirs, files in os.walk(epics_dir):
         for file in files:
             if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
                 old = False
@@ -186,13 +199,22 @@ config_path = ""
 foundOPI = False
 foundEPICS = False
 foundCSS = False
+forced = False
+
+parser = argparse.ArgumentParser(description="Update references between OPI files")
+parser.add_argument('-f', dest='config_path', help="Bypass confirmation prompts. Requires a path to a config file")
+parsed_args = parser.parse_args()
+
+if parsed_args.config_path is not None:
+    config_path = parsed_args.config_path
+    forced = True
 
 opi_directory = ""
 epics_directory = ""
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 1 and not forced:
     config_path = sys.argv[1]
-else:
+elif config_path == "":
     while response != 'y' and response != 'n':
         response = input("Use config file? (y/n) ").lower()
     if response == 'y':
@@ -236,17 +258,17 @@ if config_path != "":
             continue
 
 # get directory paths
-if not foundOPI:
+if not foundOPI and not forced:
     opi_directory = ""
     while not os.path.isdir(opi_directory):
         opi_directory = input("Enter path to target OPI directory: ")
 
-if not foundEPICS:
+if not foundEPICS and not forced:
     epics_directory = ""
     while not os.path.isdir(epics_directory):
         epics_directory = input("Enter path to EPICS directory containing modules: ")
 
-if not foundCSS:
+if not foundCSS and not forced:
     # ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
     print("If installed, CS Studio can be used to convert MEDM adl files into BOY opi files.")
     response = ""
@@ -308,7 +330,7 @@ while len(matches) != 0 or start is True:
                     ver = verSearch.group(1)
                     # print("version: " + ver)
                     response = ""
-                    if not found:
+                    if not found and not forced:
                         while response != 'y' and response != 'n':
                             response = input("Register " + match + " " + ver + "? (y/n) ")
                         if response == 'y':
@@ -321,7 +343,7 @@ while len(matches) != 0 or start is True:
                         verSearch = re.search("(\d+.\d+.\d+)", output)
                     if verSearch is not None:
                         ver = verSearch.group(1)
-                        if not found:
+                        if not found and not forced:
                             response = ""
                             while response != 'y' and response != 'n':
                                 response = input("Register " + match + " " + ver + "? (y/n) ")
@@ -331,12 +353,13 @@ while len(matches) != 0 or start is True:
                             print("Registered " + match + " " + ver)
                             plug2ver[match] = ver
                     else:
-                        while response != 'y' and response != 'n':
-                            response = input("Detected " + match + " but could not find version. Register and "
-                                             "confirm version? (y/n) ").lower()
-                        if response == 'y':
-                            ver = input("Enter version: ")
-                            plug2ver[match] = ver
+                        if not forced:
+                            while response != 'y' and response != 'n':
+                                response = input("Detected " + match + " but could not find version. Register and "
+                                                 "confirm version? (y/n) ").lower()
+                            if response == 'y':
+                                ver = input("Enter version: ")
+                                plug2ver[match] = ver
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
@@ -362,7 +385,7 @@ if error is False:
                     choice = plugin
                     break
                 print(plugin)
-        if found is True:
+        if found is True and not forced:
             while choice not in match_list and choice.lower() != "back" and choice.lower() != "reg":
                 choice = input('Enter plugin to register (or "back" to search again or "reg"'
                                ' to register search term): ')
@@ -371,14 +394,14 @@ if error is False:
             if choice.lower() == "reg":
                 choice = query
             register_plugin(choice, None)
-        else:
+        elif not forced:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
                 register_plugin(query, None)
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
-else:
+elif not forced:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":

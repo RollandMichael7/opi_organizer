@@ -3,7 +3,7 @@
 # This will break any references from an OPI of one plugin to an OPI of another (such as any reference to ADCore),
 # which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.06.26
+# version: 2018.06.28
 
 
 import os
@@ -11,6 +11,7 @@ import re
 import fileinput
 import sys
 import subprocess
+import argparse
 from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
@@ -126,6 +127,12 @@ def convert_adls(ad_dir, opi_dir):
 # given a directory of Area Detector files, construct a hierarchical directory that
 # groups OPIs into their respective plugins and versions
 def organize(ad_dir, opi_dir):
+    if not os.path.isdir(ad_dir):
+        print("Invalid directory: " + ad_dir)
+        return
+    if not os.path.isdir(opi_dir):
+        print("Invalid directory: " + opi_dir)
+        return
     ver = ""
     dirName = ""
     for root, dirs, files in os.walk(ad_dir):
@@ -224,13 +231,22 @@ config_path = ""
 foundOPI = False
 foundAD = False
 foundCSS = False
+forced = False
 
-opi_directory = ""
 ad_directory = ""
+opi_directory = ""
 
-if len(sys.argv) > 1:
+parser = argparse.ArgumentParser(description="Update references between OPI files")
+parser.add_argument('-f', dest='config_path', help="Bypass confirmation prompts. Requires a path to a config file")
+parsed_args = parser.parse_args()
+
+if parsed_args.config_path is not None:
+    config_path = parsed_args.config_path
+    forced = True
+
+if len(sys.argv) > 1 and not forced:
     config_path = sys.argv[1]
-else:
+elif config_path == "":
     while response != 'y' and response != 'n':
         response = input("Use config file? (y/n) ").lower()
     if response == 'y':
@@ -274,12 +290,12 @@ if config_path != "":
             continue
 
 # get directory paths
-if not foundOPI:
+if not foundOPI and not forced:
     opi_directory = ""
     while not os.path.isdir(opi_directory):
         opi_directory = input("Enter path to target OPI directory: ")
 
-if not foundAD:
+if not foundAD and not forced:
     ad_directory = ""
     while not os.path.isdir(ad_directory):
         ad_directory = input("Enter path to AreaDetector directory containing plugins: ")
@@ -299,10 +315,11 @@ try:
                 print("Detected ADCore " + ADCore_ver)
                 break
 except IOError:
-    print("Could not detect ADCore version.")
-    ADCore_ver = input("Enter ADCore version: ")
+    if not forced:
+        print("Could not detect ADCore version.")
+        ADCore_ver = input("Enter ADCore version: ")
 
-if not foundCSS:
+if not foundCSS and not forced:
     # ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
     print("If installed, CS Studio can be used to convert MEDM adl files into BOY opi files.")
     response = ""
@@ -376,7 +393,7 @@ while len(matches) != 0 or start is True:
                             found = True
                             response = ""
                             plugin_ver = version.group(1)
-                            if skip is False:
+                            if skip is False and not forced:
                                 while response != 'y' and response != 'n':
                                     response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
                             if response == 'y' or skip is True:
@@ -387,7 +404,7 @@ while len(matches) != 0 or start is True:
                                 if skip is True:
                                     print("Registered " + match + " " + plugin_ver)
                             break
-                if found is False and ver == "":
+                if found is False and ver == "" and not forced:
                     while response != 'y' and response != 'n':
                         response = input("Detected " + match + " but could not find version. Register and "
                                    "confirm version? (y/n) ").lower()
@@ -410,17 +427,18 @@ while len(matches) != 0 or start is True:
                         if verSearch is not None:
                             ver = verSearch.group(1)
                             response = ""
-                            while response != 'y' and response != 'n':
+                            while response != 'y' and response != 'n' and not forced:
                                 response = input("Register " + match + " " + ver + "? (y/n) ")
                             if response == 'n':
                                 continue
                         else:
                             raise FileNotFoundError
                     except FileNotFoundError:
+                        response = ""
                         output = ""
                         verSearch = None
                         print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
-                        while response != 'y' and response != 'n':
+                        while response != 'y' and response != 'n' and not forced:
                             response = input("Detected " + match + " but could not find version. Register and "
                                        "confirm version? (y/n) ").lower()
                         if response == 'y':
@@ -434,7 +452,7 @@ while len(matches) != 0 or start is True:
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
-if error is False:
+if error is False and not forced:
     print("Done detecting plugins.")
     choice = ""
     substr = ""
@@ -472,7 +490,7 @@ if error is False:
                 register_plugin(query, None)
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
-else:
+elif not forced:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":
