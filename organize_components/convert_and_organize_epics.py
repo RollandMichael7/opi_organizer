@@ -328,13 +328,14 @@ while len(matches) != 0 or start is True:
                 try:
                     command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
                     output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    verSearch = re.search("(R\d+-\d+)", output)
+                    verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
                 except FileNotFoundError:
                     output = ""
                     verSearch = None
                     print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
                 if verSearch is not None:
                     ver = verSearch.group(1)
+                    ver = "R" + ver
                     # print("version: " + ver)
                     response = ""
                     if not found and not forced:
@@ -347,9 +348,10 @@ while len(matches) != 0 or start is True:
                         plug2ver[match] = ver
                 else:
                     if output != "":
-                        verSearch = re.search("(\d+.\d+.\d+)", output)
+                        verSearch = re.search("(\d+.\d+(?:.\d+)*)", output)
                     if verSearch is not None:
                         ver = verSearch.group(1)
+                        ver = "R" + ver
                         if not found and not forced:
                             response = ""
                             while response != 'y' and response != 'n':
