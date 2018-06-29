@@ -71,13 +71,9 @@ def convert_adls(epics_dir, opi_dir):
                         print("File has already been converted.")
                         continue
                     # if <filename>.opi already exists in the adl folder, it has been converted but
-                    # not moved, so it is moved
+                    # not moved, so it is deleted and converted/moved again for simplicity
                     if os.path.isfile(os.path.join(root,file)[:-4] + ".opi"):
-                        if not os.path.exists(newPath):
-                            os.makedirs(newPath)
-                        os.rename(os.path.join(root,file)[:-4] + ".opi", newPath + os.sep + opi)
-                        print("moved file: " + newPath + os.sep + opi)
-                        continue
+                        os.remove(os.path.join(root,file)[:-4] + ".opi")
                     css_dict[os.path.join(root, file)] = [plugin, ver]
                     file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
     if len(css_dict) > 3:
@@ -162,6 +158,39 @@ def organize(epics_dir, opi_dir):
                             print("File already exists. " + newPath)
                 else:
                     print("File is already organized.")
+    # do same thing for opi directory
+    directory = opi_dir
+    for file in os.listdir(opi_dir):
+        if os.path.isfile(os.path.join(opi_dir, file)) and file.endswith(".opi"):
+            isPlugin = False
+            for plugin in plug2ver.keys():
+                if plugin.casefold() in file.casefold():
+                    if plugin == "Andor" and "Andor3" in file:
+                        continue
+                    isPlugin = True
+                    dirName = plugin
+                    ver = plug2ver[plugin]
+                    print("Found " + dirName + " file: " + file + " (" + os.path.join(opi_dir, file) + ")")
+                    break
+            if isPlugin is False:
+                unidentifiedFiles_dict[file] = os.path.join(opi_dir, file)
+                continue
+            newPath = directory + os.sep + dirName + os.sep + ver
+            oldPath = os.path.join(directory, file)
+            if not os.path.exists(newPath):
+                print("making new folder...")
+                os.makedirs(newPath)
+            newPath = newPath + os.sep + file
+            if oldPath != newPath:
+                try:
+                    os.rename(oldPath, newPath)
+                except FileExistsError:
+                    # if file exists in both new and old directory, remove old one
+                    os.remove(oldPath)
+                    print("File already exists.")
+                    continue
+                print("File moved.")
+                print("File is already organized.")
 
 
 ########################### MAIN ###########################
