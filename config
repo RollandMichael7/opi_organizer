@@ -1,7 +1,8 @@
 # Any combination of these options can be included; none are required.
 # CSS_PATH is ignored by the slim version, and is only used by convert scripts.
 
-CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
+   # CSS_PATH : C:\\Users\\mikes\\Documents\\cs-studio-sns\\css.exe
+CSS_PATH :
 
 # used only by convert_and_organize_epics.py
     # EPICS_DIRECTORY : C:\\Users\\mikes\\Documents\\EPICS
@@ -41,7 +42,7 @@ ADAndor
 ADAndor3
 ADBruker
 ADCSimDetector
-ADCameraLink
+ADCameraLink : R1-0
 ADDexela
 ADEiger
 ADFastCCD : R1-0
