@@ -78,7 +78,7 @@ def cross_reference(opi_dir):
                                 ver = str(folders[len(folders) - 2])
                                 foundIn = ref2path[path][1]
                                 if opi_dir == epics_dir and foundIn == ad_dir:
-                                    pluginType = str(folders[len(folders) - 6]) + os.sep + str(folders[len(folders) - 4])
+                                    pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
                             else:
                                 done = False
                                 if path.startswith("AD") or path.startswith("ND"):
@@ -104,7 +104,7 @@ def cross_reference(opi_dir):
                                                 done = True
                                                 foundIn = lookIn
                                                 if opi_dir == epics_dir and foundIn == ad_dir:
-                                                    pluginType = str(folders[len(folders) - 6]) + os.sep + str(folders[len(folders) - 4])
+                                                    pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
                                                 break
                                     if lookIn == second and not done or (lookIn == first and first == second and not not done):
                                         break
