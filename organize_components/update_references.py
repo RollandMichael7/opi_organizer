@@ -2,7 +2,7 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-06-28
+# version: 2018-07-02
 
 import glob
 import os
@@ -77,46 +77,41 @@ def cross_reference(opi_dir):
                                 plugin = str(folders[len(folders) - 3])
                                 ver = str(folders[len(folders) - 2])
                                 foundIn = ref2path[path][1]
+                                if opi_dir == epics_dir and foundIn == ad_dir:
+                                    pluginType = str(folders[len(folders) - 6]) + os.sep + str(folders[len(folders) - 4])
                             else:
                                 done = False
-                                if path.startswith("AD"):
+                                if path.startswith("AD") or path.startswith("ND"):
                                     first = ad_dir
                                     second = epics_dir
                                 else:
                                     first = epics_dir
                                     second = ad_dir
-                                for top, dirs, filenames in os.walk(first):
-                                    if done:
-                                        break
-                                    for filename in filenames:
-                                        if filename == path:
-                                            folders = os.path.join(top, filename)
-                                            ref2path[path] = [folders, first]
-                                            folders = folders.split(os.sep)
-                                            pluginType = str(folders[len(folders) - 4])
-                                            # sys.stderr.write("type: " + pluginType + "\n")
-                                            plugin = str(folders[len(folders) - 3])
-                                            ver = str(folders[len(folders) - 2])
-                                            done = True
-                                            foundIn = first
-                                            break
-                                if plugin == "" and ad_dir != epics_dir:
-                                    for top, dirs, filenames in os.walk(second):
+                                lookIn = first
+                                while not done:
+                                    for top, dirs, filenames in os.walk(lookIn):
                                         if done:
                                             break
                                         for filename in filenames:
                                             if filename == path:
                                                 folders = os.path.join(top, filename)
-                                                ref2path[path] = [folders, second]
+                                                ref2path[path] = [folders, lookIn]
                                                 folders = folders.split(os.sep)
                                                 pluginType = str(folders[len(folders) - 4])
                                                 # sys.stderr.write("type: " + pluginType + "\n")
                                                 plugin = str(folders[len(folders) - 3])
                                                 ver = str(folders[len(folders) - 2])
                                                 done = True
-                                                foundIn = second
+                                                foundIn = lookIn
+                                                if opi_dir == epics_dir and foundIn == ad_dir:
+                                                    pluginType = str(folders[len(folders) - 6]) + os.sep + str(folders[len(folders) - 4])
                                                 break
-                                if plugin == "":
+                                    if lookIn == second and not done or (lookIn == first and first == second and not not done):
+                                        break
+                                    if done:
+                                        break
+                                    lookIn = second
+                                if not done:
                                     sys.stderr.write("Could not identify reference. Left unchanged\n")
                             if plugin != "":
                                 if plugin != tag and plugin != "" and tag != "":
