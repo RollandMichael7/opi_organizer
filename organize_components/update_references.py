@@ -2,7 +2,7 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-07-02
+# version: 2018-07-03
 
 import glob
 import os
@@ -77,7 +77,7 @@ def cross_reference(opi_dir):
                                 plugin = str(folders[len(folders) - 3])
                                 ver = str(folders[len(folders) - 2])
                                 foundIn = ref2path[path][1]
-                                if opi_dir == epics_dir and foundIn == ad_dir:
+                                if foundIn == ad_dir:
                                     pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
                             else:
                                 done = False
@@ -103,7 +103,7 @@ def cross_reference(opi_dir):
                                                 ver = str(folders[len(folders) - 2])
                                                 done = True
                                                 foundIn = lookIn
-                                                if opi_dir == epics_dir and foundIn == ad_dir:
+                                                if foundIn == ad_dir:
                                                     pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
                                                 break
                                     if lookIn == second and not done or (lookIn == first and first == second and not not done):
@@ -115,18 +115,20 @@ def cross_reference(opi_dir):
                                     sys.stderr.write("Could not identify reference. Left unchanged\n")
                             if plugin != "":
                                 if plugin != tag and plugin != "" and tag != "":
-                                    line = before + "<" + pathTag + ">" + "$(path" + plugin[:1].upper() + plugin[1:] + \
-                                           ")" + os.sep + path + "</" + pathTag + ">" + after + "\n"
+                                    line = before + "<" + pathTag + ">"+ ".." + os.sep + ".." + os.sep + ".." + os.sep
+                                    if opi_dir == ad_dir:
+                                        line = line + ".." + os.sep
+                                    line = line + "$(path" + plugin[:1].upper() + plugin[1:] + ")" + os.sep + path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
-                                        if opi_dir == ad_dir:
-                                            isADet = True
-                                        else:
-                                            isADet = False
-                                        if isADet and foundIn == epics_dir:
-                                            isLinkToEpics = True
-                                        else:
-                                            isLinkToEpics = False
-                                        macro_dict[plugin] = [ver, pluginType, isADet, isLinkToEpics]
+                                        # if opi_dir == ad_dir:
+                                        #     isADet = True
+                                        # else:
+                                        #     isADet = False
+                                        # if isADet and foundIn == epics_dir:
+                                        #     isLinkToEpics = True
+                                        # else:
+                                        #     isLinkToEpics = False
+                                        macro_dict[plugin] = [ver, pluginType]
                                     sys.stderr.write("converted to: " + line)
                                 else:
                                     sys.stderr.write("Reference to same plugin left unchanged\n")
@@ -144,13 +146,14 @@ def add_macros(filePath, macros):
         if "<macros>" in line and not done:
             macro_str = ""
             for macro in macros.keys():
-                isADet = macros[macro][2]
-                isLinkToEpics = macros[macro][3]
+                # isADet = macros[macro][2]
+                # isLinkToEpics = macros[macro][3]
                 macro_str += "\t<" + "path" + macro[:1].upper() + macro[1:] + ">"
-                if isADet and isLinkToEpics:
-                    macro_str += ".." + os.sep
-                macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
-                             + macro + os.sep + macros[macro][0]
+                # if isADet and isLinkToEpics:
+                #     macro_str += ".." + os.sep
+                #macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
+                #             + macro + os.sep + macros[macro][0]
+                macro_str += macros[macro][1] + os.sep + macro + os.sep + macros[macro][0]
                 macro_str += "</" + "path" +  macro[:1].capitalize() + macro[1:] + ">" + "\n"
             sys.stderr.write("Added macros: " + macro_str)
             line = line + macro_str
