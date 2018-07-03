@@ -62,7 +62,8 @@ def cross_reference(opi_dir):
                             after = ""
                             path = path.group(1)
                             if "$" in path:
-                               continue
+                                print(line, end="")
+                                continue
                             sys.stderr.write("line " + str(lineNum + 1) + ": " + line)
                             search = re.search("(.*)<" + pathTag + ">", line)
                             if search is not None:
