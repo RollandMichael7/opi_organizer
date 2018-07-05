@@ -292,6 +292,8 @@ while len(matches) != 0 or start is True:
             folderName = ""
             for folder in os.listdir(epics_directory):
                 if match.casefold() in folder.casefold():
+                    if match == "ip" and ("ip330" in folder or "ipac" in folder or "ipUnidig" in folder):
+                        continue
                     folderName = folder
                     break
             if folderName != "":
