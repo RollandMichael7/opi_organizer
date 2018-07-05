@@ -291,7 +291,7 @@ while len(matches) != 0 or start is True:
         if ver == "":
             folderName = ""
             for folder in os.listdir(epics_directory):
-                if match in folder:
+                if match.casefold() in folder.casefold():
                     folderName = folder
                     break
             if folderName != "":
