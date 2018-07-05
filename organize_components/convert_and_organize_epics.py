@@ -55,7 +55,10 @@ def convert_adls(epics_dir, opi_dir):
                 tag = ""
                 # identify which plugin the adl belongs to
                 for p in plug2ver.keys():
-                    if p in os.path.join(root, file):
+                    path = os.path.join(root, file)
+                    if p in path:
+                        if p == "ip" and ("ip330" in path or "ipac" in path or "ipUnidig" in path):
+                            continue
                         plugin = p
                         ver = plug2ver[p]
                         tag = p
