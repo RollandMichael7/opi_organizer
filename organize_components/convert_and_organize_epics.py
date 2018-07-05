@@ -2,7 +2,7 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.06.28
+# version: 2018.07.05
 
 
 import os
@@ -289,38 +289,29 @@ while len(matches) != 0 or start is True:
                 print("Registered " + match + " " + ver)
             plug2ver[match] = ver
         if ver == "":
-            release_path = epics_directory + os.sep + match
-            if os.path.isdir(release_path):
-                dirPath = os.path.abspath(release_path) + os.sep + ".git"
-                try:
-                    command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
-                    output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    verSearch = re.search("(\d+\.\d+(?:\.\d+)*)", output)
-                except FileNotFoundError:
-                    output = ""
-                    verSearch = None
-                    print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
-                if verSearch is not None:
-                    ver = verSearch.group(1)
-                    ver = "R" + ver
-                    # print("version: " + ver)
-                    response = ""
-                    if not found and not forced:
-                        while response != 'y' and response != 'n':
-                            response = input("Register " + match + " " + ver + "? (y/n) ")
-                        if response == 'y':
-                            plug2ver[match] = ver
-                    elif found:
-                        print("Registered " + match + " " + ver)
-                        plug2ver[match] = ver
-                else:
-                    if output != "":
-                        verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
+            folderName = ""
+            for folder in os.listdir(epics_directory):
+                if match in folder:
+                    folderName = folder
+                    break
+            if folderName != "":
+                release_path = epics_directory + os.sep + folderName
+                if os.path.isdir(release_path):
+                    dirPath = os.path.abspath(release_path) + os.sep + ".git"
+                    try:
+                        command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+                        output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+                        verSearch = re.search("(\d+\.\d+(?:\.\d+)*)", output)
+                    except FileNotFoundError:
+                        output = ""
+                        verSearch = None
+                        print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
                     if verSearch is not None:
                         ver = verSearch.group(1)
                         ver = "R" + ver
+                        # print("version: " + ver)
+                        response = ""
                         if not found and not forced:
-                            response = ""
                             while response != 'y' and response != 'n':
                                 response = input("Register " + match + " " + ver + "? (y/n) ")
                             if response == 'y':
@@ -329,13 +320,28 @@ while len(matches) != 0 or start is True:
                             print("Registered " + match + " " + ver)
                             plug2ver[match] = ver
                     else:
-                        if not forced:
-                            while response != 'y' and response != 'n':
-                                response = input("Detected " + match + " but could not find version. Register and "
-                                                 "confirm version? (y/n) ").lower()
-                            if response == 'y':
-                                ver = input("Enter version: ")
+                        if output != "":
+                            verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
+                        if verSearch is not None:
+                            ver = verSearch.group(1)
+                            ver = "R" + ver
+                            if not found and not forced:
+                                response = ""
+                                while response != 'y' and response != 'n':
+                                    response = input("Register " + match + " " + ver + "? (y/n) ")
+                                if response == 'y':
+                                    plug2ver[match] = ver
+                            elif found:
+                                print("Registered " + match + " " + ver)
                                 plug2ver[match] = ver
+                        else:
+                            if not forced:
+                                while response != 'y' and response != 'n':
+                                    response = input("Detected " + match + " but could not find version. Register and "
+                                                     "confirm version? (y/n) ").lower()
+                                if response == 'y':
+                                    ver = input("Enter version: ")
+                                    plug2ver[match] = ver
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
