@@ -1,10 +1,27 @@
 #!/bin/bash
+
+# BASE=/epics/base-7-0-1-1
+# DETECTOR=/epics/synApps/support/areaDetector-3-2
+# EPICS=/epics/synApps/support
 TARGET=
-BASE=/epics/base-7.0.1.1
-# DETECTOR=/home/mrolland/Documents/epics/synAppsRelease/synApps/support/areaDetector-3-3-1
+BASE=
 DETECTOR=
-# EPICS=/home/mrolland/Documents/epics/synAppsRelease/synApps/support
 EPICS=
+
+if [ -z $BASE ]; then
+    echo No EPICS base path set. Exiting
+    exit 1
+fi
+
+if [ -z $DETECTOR ]; then
+    echo No areaDetector path set. Exiting
+    exit 1
+fi
+
+if [ -z $EPICS ]; then
+    echo No EPICS modules path set. Exiting
+    exit 1
+fi
 
 if [ -z $TARGET ]; then
 	TARGET=$1
@@ -12,77 +29,95 @@ fi
 
 if ! [ -z $TARGET ]; then
 	mkdir -p $TARGET
-	cd $TARGET
-	mkdir -p areaDetector
-	mkdir -p areaDetector/ADCore
-	mkdir -p areaDetector/ADCore/ADApp
-	mkdir -p areaDetector/ADSupport
-	mkdir -p asyn
-	mkdir -p autosave
-	mkdir -p autosave/asApp
-	mkdir -p base
-	mkdir -p busy
-	mkdir -p busy/busyApp
-	mkdir -p calc
-	mkdir -p calc/calcApp
-	mkdir -p devIocStats
-	mkdir -p iocStats
-	mkdir -p sscan
-	mkdir -p sscan/sscanApp
-	
-	cp --parents -r -n $BASE/bin $TARGET/base
+
+	AD_DIR="$(ls $DETECTOR/.. | grep -m 1 areaDetector)"
+	mkdir -p $TARGET/$AD_DIR
+	AD_DIR=$TARGET/$AD_DIR
+
+	BASE_DIR="$(ls $BASE/.. | grep -m 1 base)"
+	mkdir -p $TARGET/$BASE_DIR
+	cp -r -n $BASE/bin $TARGET/$BASE_DIR
+
+	# CORE="$(ls $DETECTOR | grep -m 1 ADCore)"
+	# echo copying $CORE...
+	# mkdir -p $TARGET/areaDetector/$CORE/ADApp
+	# cp -r -n $DETECTOR/$CORE/bin $AD_DIR/$CORE
+	# cp -r -n $DETECTOR/$CORE/lib $AD_DIR/$CORE
+	# cp -r -n $DETECTOR/$CORE/db $AD_DIR/$CORE
+	# cp -r -n $DETECTOR/$CORE/documentation $AD_DIR/$CORE
+	# cp -r -n $DETECTOR/$CORE/iocBoot $AD_DIR/$CORE
+	# cp -r -n $DETECTOR/$CORE/Viewers $AD_DIR/$CORE
+	# cp -r -n $DETECTOR/$CORE/ADApp/Db $AD_DIR/$CORE/ADApp
+	# cp -r -n $DETECTOR/$CORE/ADApp/op $AD_DIR/$CORE/ADApp
 
 	echo copying ADCore...
-	cp -r -n $DETECTOR/ADCore/bin $TARGET/areaDetector/ADCore
-	cp -r -n $DETECTOR/ADCore/lib $TARGET/areaDetector/ADCore
-	cp -r -n $DETECTOR/ADCore/db $TARGET/areaDetector/ADCore
-	cp -r -n $DETECTOR/ADCore/documentation $TARGET/areaDetector/ADCore
-	cp -r -n $DETECTOR/ADCore/iocBoot $TARGET/areaDetector/ADCore
-	cp -r -n $DETECTOR/ADCore/Viewers $TARGET/areaDetector/ADCore
-	cp -r -n $DETECTOR/ADCore/ADApp/Db $TARGET/areaDetector/ADCore/ADApp
-	cp -r -n $DETECTOR/ADCore/ADApp/op $TARGET/areaDetector/ADCore/ADApp
+	mkdir -p $AD_DIR/ADCore/ADApp
+	cp -r -n $DETECTOR/ADCore/bin $AD_DIR/ADCore
+	cp -r -n $DETECTOR/ADCore/lib $AD_DIR/ADCore
+	cp -r -n $DETECTOR/ADCore/db $AD_DIR/ADCore
+	cp -r -n $DETECTOR/ADCore/documentation $AD_DIR/ADCore
+	cp -r -n $DETECTOR/ADCore/iocBoot $AD_DIR/ADCore
+	cp -r -n $DETECTOR/ADCore/Viewers $AD_DIR/ADCore
+	cp -r -n $DETECTOR/ADCore/ADApp/Db $AD_DIR/ADCore/ADApp
+	cp -r -n $DETECTOR/ADCore/ADApp/op $AD_DIR/ADCore/ADApp
 
-	echo copying ADSupport...
-	cp -r -n $DETECTOR/ADSupport/bin $TARGET/areaDetector/ADSupport
+	SUPPORT="$(ls $DETECTOR | grep -m 1 ADSupport)"
+	echo copying $SUPPORT...
+	mkdir -p $AD_DIR/$SUPPORT
+	cp -r -n $DETECTOR/$SUPPORT/bin $AD_DIR/$SUPPORT
 	
-	echo copying asyn...
-	cp -r -n $EPICS/asyn/bin $TARGET/asyn
-	cp -r -n $EPICS/asyn/db $TARGET/asyn
-	cp -r -n $EPICS/asyn/opi $TARGET/asyn
-	cp -r -n $EPICS/asyn/lib $TARGET/asyn
+	ASYN="$(ls $EPICS | grep -m 1 asyn)"
+	echo copying $ASYN...
+	mkdir -p $TARGET/$ASYN
+	cp -r -n $EPICS/$ASYN/bin $TARGET/$ASYN
+	cp -r -n $EPICS/$ASYN/db $TARGET/$ASYN
+	cp -r -n $EPICS/$ASYN/opi $TARGET/$ASYN
+	cp -r -n $EPICS/$ASYN/lib $TARGET/$ASYN
 
-	echo copying autosave...
-	cp -r -n $EPICS/autosave/asApp/Db $TARGET/autosave/asApp
-	cp -r -n $EPICS/autosave/asApp/op $TARGET/autosave/asApp
-	cp -r -n $EPICS/autosave/bin $TARGET/autosave
+	SAVE="$(ls $EPICS | grep -m 1 autosave)"
+	echo copying $SAVE...
+	mkdir -p $TARGET/$SAVE/asApp
+	cp -r -n $EPICS/$SAVE/asApp/Db $TARGET/$SAVE/asApp
+	cp -r -n $EPICS/$SAVE/asApp/op $TARGET/$SAVE/asApp
+	cp -r -n $EPICS/$SAVE/bin $TARGET/$SAVE
 
-	echo copying busy...
-	cp -r -n $EPICS/busy/busyApp/Db $TARGET/busy
-	cp -r -n $EPICS/busy/busyApp/op $TARGET/busy
+	BUSY="$(ls $EPICS | grep -m 1 busy)"
+	echo copying $BUSY...
+	mkdir -p $TARGET/$BUSY/busyApp
+	cp -r -n $EPICS/$BUSY/busyApp/Db $TARGET/$BUSY/busyApp
+	cp -r -n $EPICS/$BUSY/busyApp/op $TARGET/$BUSY/busyApp
 
-	echo copying calc...
-	cp -r -n $EPICS/calc/calcApp/Db $TARGET/calc/calcApp
-	cp -r -n $EPICS/calc/calcApp/op $TARGET/calc/calcApp
+	CALC="$(ls $EPICS | grep -m 1 calc)"
+	echo copying $CALC...
+	mkdir -p $TARGET/$CALC/calcApp
+	cp -r -n $EPICS/$CALC/calcApp/Db $TARGET/$CALC/calcApp
+	cp -r -n $EPICS/$CALC/calcApp/op $TARGET/$CALC/calcApp
 
-	echo copying devIocStats...
-	cp -r -n $EPICS/devIocStats/bin $TARGET/devIocStats
-	cp -r -n $EPICS/devIocStats/lib $TARGET/devIocStats
-	cp -r -n $EPICS/devIocStats/db $TARGET/devIocStats
-	cp -r -n $EPICS/devIocStats/op $TARGET/devIocStats
+	DSTATS="$(ls $EPICS | grep -m 1 devIocStats)"
+	echo copying $DSTATS...
+	mkdir -p $TARGET/$DSTATS
+	cp -r -n $EPICS/$DSTATS/bin $TARGET/$DSTATS
+	cp -r -n $EPICS/$DSTATS/lib $TARGET/$DSTATS
+	cp -r -n $EPICS/$DSTATS/db $TARGET/$DSTATS
+	cp -r -n $EPICS/$DSTATS/op $TARGET/$DSTATS
 
-	echo copying iocStats...
-	cp -r -n $EPICS/iocStats/bin $TARGET/iocStats
-	cp -r -n $EPICS/iocStats/lib $TARGET/iocStats
-	cp -r -n $EPICS/iocStats/db $TARGET/iocStats
-	cp -r -n $EPICS/iocStats/op $TARGET/iocStats
+	STATS="$(ls $EPICS | grep -m 1 iocStats)"
+	echo copying $STATS...
+	mkdir -p $TARGET/$STATS
+	cp -r -n $EPICS/$STATS/bin $TARGET/$STATS
+	cp -r -n $EPICS/$STATS/lib $TARGET/$STATS
+	cp -r -n $EPICS/$STATS/db $TARGET/$STATS
+	cp -r -n $EPICS/$STATS/op $TARGET/$STATS
 
-	echo copying sscan...
-	cp -r -n $EPICS/sscan/sscanApp/Db $TARGET/sscan/sscanApp
-	cp -r -n $EPICS/sscan/sscanApp/op $TARGET/sscan/sscanApp
+	SCAN="$(ls $EPICS | grep -m 1 sscan)"
+	echo copying $SCAN...
+	mkdir -p $TARGET/$SCAN/sscanApp
+	cp -r -n $EPICS/$SCAN/sscanApp/Db $TARGET/$SCAN/sscanApp
+	cp -r -n $EPICS/$SCAN/sscanApp/op $TARGET/$SCAN/sscanApp
 
 	echo done.
 else
-	echo invalid TARGET. Did you set one?
+	echo Invalid TARGET. Did you set one?
 fi
 
 
