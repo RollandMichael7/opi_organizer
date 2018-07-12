@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# BASE=/epics/base-7-0-1-1
-# DETECTOR=/epics/synApps/support/areaDetector-3-2
-# EPICS=/epics/synApps/support
-TARGET=
-BASE=
-DETECTOR=
-EPICS=
+BASE=/epics/base-7-0-1-1
+DETECTOR=/epics/synApps/support/areaDetector-3-2
+EPICS=/epics/synApps/support
+TARGET=./test
+#BASE=
+#DETECTOR=
+#EPICS=
 
 if [ -z $BASE ]; then
     echo No EPICS base path set. Exiting
@@ -23,7 +23,7 @@ if [ -z $EPICS ]; then
     exit 1
 fi
 
-if [ -z $TARGET ]; then
+if ! [ -z $1 ]; then
 	TARGET=$1
 fi
 
@@ -38,17 +38,22 @@ if ! [ -z $TARGET ]; then
 	mkdir -p $TARGET/$BASE_DIR
 	cp -r -n $BASE/bin $TARGET/$BASE_DIR
 
+	echo looking for ADCore...
 	# CORE="$(ls $DETECTOR | grep -m 1 ADCore)"
-	# echo copying $CORE...
-	# mkdir -p $TARGET/areaDetector/$CORE/ADApp
-	# cp -r -n $DETECTOR/$CORE/bin $AD_DIR/$CORE
-	# cp -r -n $DETECTOR/$CORE/lib $AD_DIR/$CORE
-	# cp -r -n $DETECTOR/$CORE/db $AD_DIR/$CORE
-	# cp -r -n $DETECTOR/$CORE/documentation $AD_DIR/$CORE
-	# cp -r -n $DETECTOR/$CORE/iocBoot $AD_DIR/$CORE
-	# cp -r -n $DETECTOR/$CORE/Viewers $AD_DIR/$CORE
-	# cp -r -n $DETECTOR/$CORE/ADApp/Db $AD_DIR/$CORE/ADApp
-	# cp -r -n $DETECTOR/$CORE/ADApp/op $AD_DIR/$CORE/ADApp
+	# if ! [ -z $CORE ]; then
+	        # echo copying $CORE...
+	        # mkdir -p $TARGET/areaDetector/$CORE/ADApp
+	        # cp -r -n $DETECTOR/$CORE/bin $AD_DIR/$CORE
+	        # cp -r -n $DETECTOR/$CORE/lib $AD_DIR/$CORE
+ 	        # cp -r -n $DETECTOR/$CORE/db $AD_DIR/$CORE
+	        # cp -r -n $DETECTOR/$CORE/documentation $AD_DIR/$CORE
+	        # cp -r -n $DETECTOR/$CORE/iocBoot $AD_DIR/$CORE
+	        # cp -r -n $DETECTOR/$CORE/Viewers $AD_DIR/$CORE
+	        # cp -r -n $DETECTOR/$CORE/ADApp/Db $AD_DIR/$CORE/ADApp
+	        # cp -r -n $DETECTOR/$CORE/ADApp/op $AD_DIR/$CORE/ADApp
+	# else
+	        # echo Not found
+	# fi
 
 	echo copying ADCore...
 	mkdir -p $AD_DIR/ADCore/ADApp
@@ -61,59 +66,97 @@ if ! [ -z $TARGET ]; then
 	cp -r -n $DETECTOR/ADCore/ADApp/Db $AD_DIR/ADCore/ADApp
 	cp -r -n $DETECTOR/ADCore/ADApp/op $AD_DIR/ADCore/ADApp
 
+	echo looking for ADSupport...
 	SUPPORT="$(ls $DETECTOR | grep -m 1 ADSupport)"
-	echo copying $SUPPORT...
-	mkdir -p $AD_DIR/$SUPPORT
-	cp -r -n $DETECTOR/$SUPPORT/bin $AD_DIR/$SUPPORT
-	
+	if ! [ -z $SUPPORT ]; then
+	    echo copying $SUPPORT...
+	    mkdir -p $AD_DIR/$SUPPORT
+	    cp -r -n $DETECTOR/$SUPPORT/bin $AD_DIR/$SUPPORT
+	else
+	    echo Not found.
+	fi
+
+	echo looking for asyn...
 	ASYN="$(ls $EPICS | grep -m 1 asyn)"
-	echo copying $ASYN...
-	mkdir -p $TARGET/$ASYN
-	cp -r -n $EPICS/$ASYN/bin $TARGET/$ASYN
-	cp -r -n $EPICS/$ASYN/db $TARGET/$ASYN
-	cp -r -n $EPICS/$ASYN/opi $TARGET/$ASYN
-	cp -r -n $EPICS/$ASYN/lib $TARGET/$ASYN
+	if ! [ -z $ASYN ]; then
+	    echo copying $ASYN...
+	    mkdir -p $TARGET/$ASYN
+	    cp -r -n $EPICS/$ASYN/bin $TARGET/$ASYN
+	    cp -r -n $EPICS/$ASYN/db $TARGET/$ASYN
+	    cp -r -n $EPICS/$ASYN/opi $TARGET/$ASYN
+	    cp -r -n $EPICS/$ASYN/lib $TARGET/$ASYN
+	else
+	    echo Not found.
+	fi
 
+	echo looking for autosave...
 	SAVE="$(ls $EPICS | grep -m 1 autosave)"
-	echo copying $SAVE...
-	mkdir -p $TARGET/$SAVE/asApp
-	cp -r -n $EPICS/$SAVE/asApp/Db $TARGET/$SAVE/asApp
-	cp -r -n $EPICS/$SAVE/asApp/op $TARGET/$SAVE/asApp
-	cp -r -n $EPICS/$SAVE/bin $TARGET/$SAVE
+	if ! [ -z $SAVE ]; then
+	    echo copying $SAVE...
+	    mkdir -p $TARGET/$SAVE/asApp
+	    cp -r -n $EPICS/$SAVE/asApp/Db $TARGET/$SAVE/asApp
+	    cp -r -n $EPICS/$SAVE/asApp/op $TARGET/$SAVE/asApp
+	    cp -r -n $EPICS/$SAVE/bin $TARGET/$SAVE
+	else
+	    echo Not found.
+	fi
 
+	echo looking for busy...
 	BUSY="$(ls $EPICS | grep -m 1 busy)"
-	echo copying $BUSY...
-	mkdir -p $TARGET/$BUSY/busyApp
-	cp -r -n $EPICS/$BUSY/busyApp/Db $TARGET/$BUSY/busyApp
-	cp -r -n $EPICS/$BUSY/busyApp/op $TARGET/$BUSY/busyApp
+	if ! [ -z $BUSY ]; then
+	    echo copying $BUSY...
+	    mkdir -p $TARGET/$BUSY/busyApp
+	    cp -r -n $EPICS/$BUSY/busyApp/Db $TARGET/$BUSY/busyApp
+	    cp -r -n $EPICS/$BUSY/busyApp/op $TARGET/$BUSY/busyApp
+	fi
 
+	echo looking for calc...
 	CALC="$(ls $EPICS | grep -m 1 calc)"
-	echo copying $CALC...
-	mkdir -p $TARGET/$CALC/calcApp
-	cp -r -n $EPICS/$CALC/calcApp/Db $TARGET/$CALC/calcApp
-	cp -r -n $EPICS/$CALC/calcApp/op $TARGET/$CALC/calcApp
+	if ! [ -z $CALC ]; then
+	    echo copying $CALC...
+	    mkdir -p $TARGET/$CALC/calcApp
+	    cp -r -n $EPICS/$CALC/calcApp/Db $TARGET/$CALC/calcApp
+	    cp -r -n $EPICS/$CALC/calcApp/op $TARGET/$CALC/calcApp
+	else
+	    echo Not found.
+	fi
 
+	echo looking for devIocStats...
 	DSTATS="$(ls $EPICS | grep -m 1 devIocStats)"
-	echo copying $DSTATS...
-	mkdir -p $TARGET/$DSTATS
-	cp -r -n $EPICS/$DSTATS/bin $TARGET/$DSTATS
-	cp -r -n $EPICS/$DSTATS/lib $TARGET/$DSTATS
-	cp -r -n $EPICS/$DSTATS/db $TARGET/$DSTATS
-	cp -r -n $EPICS/$DSTATS/op $TARGET/$DSTATS
+	if ! [ -z $DSTATS ]; then
+	    echo copying $DSTATS...
+	    mkdir -p $TARGET/$DSTATS
+	    cp -r -n $EPICS/$DSTATS/bin $TARGET/$DSTATS
+	    cp -r -n $EPICS/$DSTATS/lib $TARGET/$DSTATS
+	    cp -r -n $EPICS/$DSTATS/db $TARGET/$DSTATS
+	    cp -r -n $EPICS/$DSTATS/op $TARGET/$DSTATS
+	else
+	    echo Not found.
+	fi
 
+	echo looking for iocStats...
 	STATS="$(ls $EPICS | grep -m 1 iocStats)"
-	echo copying $STATS...
-	mkdir -p $TARGET/$STATS
-	cp -r -n $EPICS/$STATS/bin $TARGET/$STATS
-	cp -r -n $EPICS/$STATS/lib $TARGET/$STATS
-	cp -r -n $EPICS/$STATS/db $TARGET/$STATS
-	cp -r -n $EPICS/$STATS/op $TARGET/$STATS
+	if ! [ -z $SUPPORT ]; then
+	    echo copying $STATS...
+	    mkdir -p $TARGET/$STATS
+	    cp -r -n $EPICS/$STATS/bin $TARGET/$STATS
+	    cp -r -n $EPICS/$STATS/lib $TARGET/$STATS
+	    cp -r -n $EPICS/$STATS/db $TARGET/$STATS
+	    cp -r -n $EPICS/$STATS/op $TARGET/$STATS
+	else
+	    echo Not found.
+	fi
 
+	echo looking for sscan...
 	SCAN="$(ls $EPICS | grep -m 1 sscan)"
-	echo copying $SCAN...
-	mkdir -p $TARGET/$SCAN/sscanApp
-	cp -r -n $EPICS/$SCAN/sscanApp/Db $TARGET/$SCAN/sscanApp
-	cp -r -n $EPICS/$SCAN/sscanApp/op $TARGET/$SCAN/sscanApp
+	if ! [ -z $SUPPORT ]; then
+	    echo copying $SCAN...
+	    mkdir -p $TARGET/$SCAN/sscanApp
+	    cp -r -n $EPICS/$SCAN/sscanApp/Db $TARGET/$SCAN/sscanApp
+	    cp -r -n $EPICS/$SCAN/sscanApp/op $TARGET/$SCAN/sscanApp
+	else
+	    echo Not found.
+	fi
 
 	echo done.
 else

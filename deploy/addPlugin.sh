@@ -1,9 +1,9 @@
 #!/bin/bash
-# DETECTOR=/epics/synApps/support/areaDetector-3-2
-DETECTOR=
-TARGET=
+DETECTOR=/epics/synApps/support/areaDetector-3-2
+# DETECTOR=
+TARGET=./test
 
-if [ -z $TARGET ]; then
+if ! [ -z $1 ]; then
 	TARGET=$1
 fi
 
@@ -15,7 +15,7 @@ fi
 if ! [ -z $TARGET ]; then
 	echo name of AD plugin to add:
 	read PLUGIN
-	if [ -d $DETECTOR/$plugin ]; then
+	if [ -d $DETECTOR/$PLUGIN ]; then
 		APP="$(ls $DETECTOR/$plugin | grep App)"
 		AD_DIR="$(ls $DETECTOR/.. | grep areaDetector)"
 		mkdir -p $TARGET/$AD_DIR/$PLUGIN/$APP
