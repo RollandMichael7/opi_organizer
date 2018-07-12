@@ -1,12 +1,12 @@
 #!/bin/bash
 
-BASE=/epics/base-7-0-1-1
-DETECTOR=/epics/synApps/support/areaDetector-3-2
-EPICS=/epics/synApps/support
-TARGET=./test
-#BASE=
-#DETECTOR=
-#EPICS=
+# BASE=/epics/base-7-0-1-1
+# DETECTOR=/epics/synApps/support/areaDetector-3-2
+# EPICS=/epics/synApps/support
+TARGET=
+BASE=
+DETECTOR=
+EPICS=
 
 if [ -z $BASE ]; then
     echo No EPICS base path set. Exiting

@@ -1,7 +1,8 @@
 #!/bin/bash
-DETECTOR=/epics/synApps/support/areaDetector-3-2
-# DETECTOR=
-TARGET=./test
+
+# DETECTOR=/epics/synApps/support/areaDetector-3-2
+DETECTOR=
+TARGET=
 
 if ! [ -z $1 ]; then
 	TARGET=$1
