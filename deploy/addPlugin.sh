@@ -26,6 +26,7 @@ if ! [ -z $TARGET ]; then
 		cp -r -n $DETECTOR/$PLUGIN/db $AD_DIR/$PLUGIN
 		cp -r -n $DETECTOR/$PLUGIN/documentation $AD_DIR/$PLUGIN
 		cp -r -n $DETECTOR/$PLUGIN/iocs $AD_DIR/$PLUGIN
+		cp -r -n $DETECTOR/$PLUGIN/lib $AD_DIR/$PLUGIN
 		cp -r -n $DETECTOR/$PLUGIN/$APP/Db $AD_DIR/$PLUGIN/$APP
 		cp -r -n $DETECTOR/$PLUGIN/$APP/op $AD_DIR/$PLUGIN/$APP
 	else

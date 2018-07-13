@@ -72,6 +72,8 @@ if ! [ -z $TARGET ]; then
 	    echo copying $SUPPORT...
 	    mkdir -p $AD_DIR/$SUPPORT
 	    cp -r -n $DETECTOR/$SUPPORT/bin $AD_DIR/$SUPPORT
+	    cp -r -n $DETECTOR/$SUPPORT/lib $AD_DIR/$SUPPORT
+	    cp -r -n $DETECTOR/$SUPPORT/supportApp $AD_DIR/$SUPPORT
 	else
 	    echo Not found.
 	fi
