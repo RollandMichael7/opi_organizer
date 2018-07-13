@@ -17,7 +17,7 @@ if ! [ -z $TARGET ]; then
 	echo name of AD plugin to add:
 	read PLUGIN
 	if [ -d $DETECTOR/$PLUGIN ]; then
-		APP="$(ls $DETECTOR/$plugin | grep App)"
+		APP="$(ls $DETECTOR/$PLUGIN | grep App)"
 		AD_DIR="$(ls $DETECTOR/.. | grep areaDetector)"
 		mkdir -p $TARGET/$AD_DIR/$PLUGIN/$APP
 		AD_DIR=$TARGET/$AD_DIR
