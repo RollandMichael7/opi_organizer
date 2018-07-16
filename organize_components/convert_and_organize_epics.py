@@ -79,7 +79,7 @@ def convert_adls(epics_dir, opi_dir):
                         os.remove(os.path.join(root,file)[:-4] + ".opi")
                     css_dict[os.path.join(root, file)] = [plugin, ver]
                     file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
-    if len(css_dict) > 3:
+    if len(css_dict) > 0:
         i = 0
         done = False
         try:

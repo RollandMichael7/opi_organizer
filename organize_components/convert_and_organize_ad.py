@@ -3,7 +3,7 @@
 # This will break any references from an OPI of one plugin to an OPI of another (such as any reference to ADCore),
 # which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.07.05
+# version: 2018.07.16
 
 
 import os
@@ -90,7 +90,7 @@ def convert_adls(ad_dir, opi_dir):
                     if plugin != "ADCore":
                         file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
                         # print("key: " + file[:-4] + ".opi")
-    if len(css_dict) > 3:
+    if len(css_dict) > 0:
         i = 0
         done = False
         try:
