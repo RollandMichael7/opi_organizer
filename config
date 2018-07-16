@@ -43,6 +43,7 @@ ADAndor3
 ADBruker
 ADCSimDetector
 ADCameralink : R1-0
+ADCameraLink : R1-0
 ADDexela
 ADEiger
 ADFastCCD : R1-0
@@ -127,3 +128,4 @@ symb
 MCoreUtils
 delaygen
 Yokogawa_DAS : R1-0
+dxpSITORO
