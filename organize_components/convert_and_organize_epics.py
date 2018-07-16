@@ -2,7 +2,7 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.07.05
+# version: 2018.07.16
 
 
 import os
@@ -57,9 +57,7 @@ def convert_adls(epics_dir, opi_dir):
                 for p in plug2ver.keys():
                     path = os.path.join(root, file)
                     if p in path:
-                        if p == "ip" and ("ip330" in path or "ipac" in path or "ipUnidig" in path):
-                            continue
-                        if p == "softGlue" and "softGlueZynq" in path:
+                        if skipPlugin(path, p):
                             continue
                         plugin = p
                         ver = plug2ver[p]
@@ -164,6 +162,15 @@ def organize(epics_dir, opi_dir):
                 else:
                     print("File is already organized.")
 
+
+def skipPlugin(path, plugin):
+    if plugin == "ip" and ("ip330" in path or "ipac" in path or "ipUnidig" in path):
+        return True
+    if plugin == "softGlue" and "softGlueZynq" in path:
+        return True
+    if plugin == "dxp" and "dxpSITORO" in path:
+        return True
+    return False
 
 ########################### MAIN ###########################
 response = ""
@@ -297,9 +304,7 @@ while len(matches) != 0 or start is True:
             folderName = ""
             for folder in os.listdir(epics_directory):
                 if match.casefold() in folder.casefold():
-                    if match == "ip" and ("ip330" in folder or "ipac" in folder or "ipUnidig" in folder):
-                        continue
-                    if match == "softGlue" and "softGlueZynq" in folder:
+                    if skipPlugin(folder, match):
                         continue
                     folderName = folder
                     break
