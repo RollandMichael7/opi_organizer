@@ -176,6 +176,66 @@ if ! [ -z $TARGET ]; then
 	else
 	    echo Not found.
 	fi
+
+	echo creating envPaths file...
+	cd $TARGET/$ASYN
+	ASYN_DIR="$(pwd)"
+	cd $HOME
+	cd $TARGET/$BUSY
+	BUSY_DIR="$(pwd)"
+	cd $HOME
+	cd $TARGET/$SAVE
+	SAVE_DIR="$(pwd)"
+	cd $HOME
+	cd $TARGET/$CALC
+	CALC_DIR="$(pwd)"
+	cd $HOME
+	cd $TARGET/$SEQ
+	SEQ_DIR="$(pwd)"
+	cd $HOME
+	cd $TARGET/$SCAN
+	SCAN_DIR="$(pwd)"
+	cd $HOME
+	if ! [ -z $STATS ]; then
+	    cd $TARGET/$STATS
+	    STATS_DIR="$(pwd)"
+	    cd $HOME
+	else
+	    cd $TARGET/$DSTATS
+	    STATS_DIR="$(pwd)"
+	    cd $HOME
+	fi
+	cd $EPICS
+	EPICS_DIR="$(pwd)"
+	cd $HOME
+	cd $AD_DIR
+	AD_DIR="$(pwd)"
+	cd $HOME
+	
+	#echo $IOC_DIR
+	#echo $ASYN_DIR
+	#echo $BUSY_DIR
+	#echo $SAVE_DIR
+	#echo $CALC_DIR
+	#echo $SEQ_DIR
+	#echo $SCAN_DIR
+	#echo $STATS_DIR
+	#echo $EPICS_DIR
+	#echo $AD_DIR
+
+	cd $TARGET
+	echo \# put this file in IOC folders to use this deployment. > envPaths
+	echo epicsEnvSet\(\"SUPPORT\", \"$EPICS_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"ASYN\", \"$ASYN_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"AREA_DETECTOR\", \"$AD_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"ADSUPPORT\", \"$AD_DIR/$SUPPORT\"\) >> envPaths
+	echo epicsEnvSet\(\"ADCORE\", \"$AD_DIR/ADCore\"\) >> envPaths
+	echo epicsEnvSet\(\"AUTOSAVE\", \"$SAVE_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"BUSY\", \"$BUSY_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"CALC\", \"$CALC_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"SNSEQ\", \"$SEQ_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"DEVIOCSTATS\", \"$STATS_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"EPICS_BASE\", \"$EPICS_DIR\"\) >> envPaths
 	
 	echo done.
 else
