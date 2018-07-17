@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# BASE=/epics/base-7-0-1-1
-# DETECTOR=/epics/synApps/support/areaDetector-3-2
-# EPICS=/epics/synApps/support
+#BASE=/epics/base-7-0-1-1
+#DETECTOR=/epics/synApps/support/areaDetector-3-2
+#EPICS=/epics/synApps/support
 TARGET=
 BASE=
 DETECTOR=
@@ -30,11 +30,17 @@ fi
 if ! [ -z $TARGET ]; then
 	mkdir -p $TARGET
 
-	AD_DIR="$(ls $DETECTOR/.. | grep -m 1 areaDetector)"
+	HOME="$(pwd)"
+	
+	cd $DETECTOR
+	AD_DIR="$(echo ${PWD##*/})"
+	cd $HOME
 	mkdir -p $TARGET/$AD_DIR
 	AD_DIR=$TARGET/$AD_DIR
 
-	BASE_DIR="$(ls $BASE/.. | grep -m 1 base)"
+	cd $BASE
+	BASE_DIR="$(echo ${PWD##*/})"
+	cd $HOME
 	mkdir -p $TARGET/$BASE_DIR
 	cp -r -n $BASE/bin $TARGET/$BASE_DIR
 

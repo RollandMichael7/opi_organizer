@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DETECTOR=/epics/synApps/support/areaDetector-3-2
+#DETECTOR=/epics/synApps/support/areaDetector-3-2
 DETECTOR=
 TARGET=
 
@@ -23,7 +23,11 @@ if ! [ -z $TARGET ]; then
 	    PLUGIN=$PLUGIN_DIR
 	    echo copying $PLUGIN_DIR...
 	    APP="$(ls $DETECTOR/$PLUGIN | grep App)"
-	    AD_DIR="$(ls $DETECTOR/.. | grep areaDetector)"
+
+	    HOME="$(pwd)"
+	    cd $DETECTOR
+	    AD_DIR="$(echo ${PWD##*/})"
+	    cd $HOME
 	    mkdir -p $TARGET/$AD_DIR/$PLUGIN/$APP
 	    AD_DIR=$TARGET/$AD_DIR
 		
