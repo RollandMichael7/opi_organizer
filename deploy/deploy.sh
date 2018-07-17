@@ -144,7 +144,7 @@ if ! [ -z $TARGET ]; then
 
 	echo looking for iocStats...
 	STATS="$(ls $EPICS | grep -m 1 iocStats)"
-	if ! [ -z $SUPPORT ]; then
+	if ! [ -z $STATS ]; then
 	    echo copying $STATS...
 	    mkdir -p $TARGET/$STATS
 	    cp -r -n $EPICS/$STATS/bin $TARGET/$STATS
@@ -157,7 +157,7 @@ if ! [ -z $TARGET ]; then
 
 	echo looking for sscan...
 	SCAN="$(ls $EPICS | grep -m 1 sscan)"
-	if ! [ -z $SUPPORT ]; then
+	if ! [ -z $SCAN ]; then
 	    echo copying $SCAN...
 	    mkdir -p $TARGET/$SCAN/sscanApp
 	    cp -r -n $EPICS/$SCAN/sscanApp/Db $TARGET/$SCAN/sscanApp
@@ -166,6 +166,17 @@ if ! [ -z $TARGET ]; then
 	    echo Not found.
 	fi
 
+	echo looking for seq...
+	SEQ="$(ls $EPICS | grep -m 1 seq)"
+	if ! [ -z $SEQ ]; then
+	    echo copying $SEQ...
+	    mkdir -p $TARGET/$SEQ
+	    cp -r -n $EPICS/$SEQ/lib $TARGET/$SEQ
+	    cp -r -n $EPICS/$SEQ/bin $TARGET/$SEQ
+	else
+	    echo Not found.
+	fi
+	
 	echo done.
 else
 	echo Invalid TARGET. Did you set one?
