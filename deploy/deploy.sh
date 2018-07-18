@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #BASE=/epics/base-7-0-1-1
-#DETECTOR=/epics/synApps/support/areaDetector-3-2
-#EPICS=/epics/synApps/support
+#DETECTOR=/home/mrolland/Documents/epics/synAppsRelease/synApps/support/areaDetector-master
+#EPICS=/home/mrolland/Documents/epics/synAppsRelease/synApps/support
 TARGET=
 BASE=
 DETECTOR=
@@ -236,6 +236,9 @@ if ! [ -z $TARGET ]; then
 	echo epicsEnvSet\(\"SNSEQ\", \"$SEQ_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"DEVIOCSTATS\", \"$STATS_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"EPICS_BASE\", \"$EPICS_DIR\"\) >> envPaths
+	echo \# epicsEnvSet\(\"TOP\", \"\<path to plugin/iocs/pluginIOC\>\"\) >> envPaths
+	echo \# epicsEnvSet\(\"IOC\", \"\<iocPlugin\>\"\) >> envPaths
+	echo \# epicsEnvSet\(\"\<PLUGIN_NAME\>\", \"\<path to plugin\>\"\) >> envPaths
 	
 	echo done.
 else
