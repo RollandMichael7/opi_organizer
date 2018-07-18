@@ -46,6 +46,8 @@ The config file specifies:
 
 After creating your config file, simply run the bash script run.sh with the path to the config file as an argument. The script will attempt to identfiy which modules and plugins are present, and attempt to find their version. If the plugin or module is not present in the whitelist, it will ask if you want to register it. Similarly, it will ask for a version if it can not find one. After all plugins/modules are registered, it identifies & converts ADL files using CS Studio, and moves the resulting OPI files into the new structure. It will then fix all the cross-references in the OPIs, replacing them with a macro specific to each plugin/module which can be used to specify a version once several versions are installed. 
 
+**Use the flag -f [path/to/config] to bypass all prompts; any plugins that are not on the whitelist OR whose version can not be identified WILL NOT be reigstered.**
+
 # Slim and Robust #
 **The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better.**
 ### Slim ###
