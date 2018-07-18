@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#BASE=/epics/base-7-0-1-1
+#BASE=/epics/base-7.0.1.1
 #DETECTOR=/home/mrolland/Documents/epics/synAppsRelease/synApps/support/areaDetector-master
 #EPICS=/home/mrolland/Documents/epics/synAppsRelease/synApps/support
 TARGET=
@@ -205,11 +205,14 @@ if ! [ -z $TARGET ]; then
 	    STATS_DIR="$(pwd)"
 	    cd $HOME
 	fi
-	cd $EPICS
-	EPICS_DIR="$(pwd)"
+	cd $TARGET
+	SUPPORT_DIR="$(pwd)"
 	cd $HOME
 	cd $AD_DIR
 	AD_DIR="$(pwd)"
+	cd $HOME
+	cd $TARGET/$BASE_DIR
+        BASE_DIR="$(pwd)"
 	cd $HOME
 	
 	#echo $IOC_DIR
@@ -225,7 +228,7 @@ if ! [ -z $TARGET ]; then
 
 	cd $TARGET
 	echo \# put this file in IOC folders to use this deployment. > envPaths
-	echo epicsEnvSet\(\"SUPPORT\", \"$EPICS_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"SUPPORT\", \"$SUPPORT_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"ASYN\", \"$ASYN_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"AREA_DETECTOR\", \"$AD_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"ADSUPPORT\", \"$AD_DIR/$SUPPORT\"\) >> envPaths
@@ -234,8 +237,9 @@ if ! [ -z $TARGET ]; then
 	echo epicsEnvSet\(\"BUSY\", \"$BUSY_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"CALC\", \"$CALC_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"SNSEQ\", \"$SEQ_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"SSCAN\", \"$SCAN_DIR\"\) >> envPaths
 	echo epicsEnvSet\(\"DEVIOCSTATS\", \"$STATS_DIR\"\) >> envPaths
-	echo epicsEnvSet\(\"EPICS_BASE\", \"$EPICS_DIR\"\) >> envPaths
+	echo epicsEnvSet\(\"EPICS_BASE\", \"$BASE_DIR\"\) >> envPaths
 	echo \# epicsEnvSet\(\"TOP\", \"\<path to plugin/iocs/pluginIOC\>\"\) >> envPaths
 	echo \# epicsEnvSet\(\"IOC\", \"\<iocPlugin\>\"\) >> envPaths
 	echo \# epicsEnvSet\(\"\<PLUGIN_NAME\>\", \"\<path to plugin\>\"\) >> envPaths
