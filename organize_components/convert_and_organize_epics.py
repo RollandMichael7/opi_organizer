@@ -56,7 +56,7 @@ def convert_adls(epics_dir, opi_dir):
                 # identify which plugin the adl belongs to
                 for p in plug2ver.keys():
                     path = os.path.join(root, file)
-                    if p in path:
+                    if p.casefold() in path.casefold():
                         if skipPlugin(path, p):
                             continue
                         plugin = p
@@ -98,7 +98,7 @@ def convert_adls(epics_dir, opi_dir):
         except OSError:
             print("Could not run CS Studio. It may not have the adl2boy feature.")
             return
-        for file in list(css_dict.keys())[3:]:
+        for file in list(css_dict.keys()):
             if css_dict[file] == "":
                 continue
             opi = file[:-4] + ".opi"
@@ -133,7 +133,7 @@ def organize(epics_dir, opi_dir):
                 # plugins being searched for
                 isPlugin = False
                 for plugin in plug2ver.keys():
-                    if plugin in os.path.join(root, file):
+                    if plugin.casefold() in os.path.join(root, file).casefold():
                         isPlugin = True
                         dirName = plugin
                         ver = plug2ver[plugin]

@@ -65,7 +65,7 @@ def convert_adls(ad_dir, opi_dir):
                     tag = None
                 else:
                     for p in plugin_dict.keys():
-                        if plugin_dict[p][0] in os.path.join(root, file):
+                        if plugin_dict[p][0].casefold() in os.path.join(root, file).casefold():
                             if plugin_dict[p][0] == "ADAndor" and "Andor3" in os.path.join(root, file):
                                 continue
                             plugin = plugin_dict[p][0]
@@ -109,7 +109,7 @@ def convert_adls(ad_dir, opi_dir):
         except OSError:
             print("Could not run CS Studio. It may not have the adl2boy feature.")
             return
-        for file in list(css_dict.keys())[3:]:
+        for file in list(css_dict.keys()):
             if css_dict[file] == "":
                 continue
             # print(file)
@@ -150,7 +150,7 @@ def organize(ad_dir, opi_dir):
                     print("Found ADCore file: " + file + " (" + os.path.join(root, file) + ")")
                 else:
                     for plugin in plugin_dict.keys():
-                        if plugin in os.path.join(root, file):
+                        if plugin.casefold() in os.path.join(root, file).casefold():
                             if plugin == "Andor" and "ADAndor3" in os.path.join(root,file):
                                 continue
                             isPlugin = True
