@@ -134,6 +134,8 @@ def organize(epics_dir, opi_dir):
                 isPlugin = False
                 for plugin in plug2ver.keys():
                     if plugin.casefold() in os.path.join(root, file).casefold():
+                        if skipPlugin(os.path.join(root, file), plugin):
+                            continue
                         isPlugin = True
                         dirName = plugin
                         ver = plug2ver[plugin]
