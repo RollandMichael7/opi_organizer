@@ -327,10 +327,7 @@ while len(matches) != 0 or start is True:
                             ver = verSearch.group(1)
                         break
             if ver != "":
-                if match.startswith("AD"):
-                    plugin_dict[match[2:]] = [match, ver]
-                else:
-                    plugin_dict[match] = [match, ver]
+                plugin_dict[match] = [match, ver]
                 print("Registered " + match + " " + ver)
                 continue
             response = ""
@@ -349,10 +346,7 @@ while len(matches) != 0 or start is True:
                     for line in release:
                         if ver != "":
                             found = True
-                            if match.startswith("AD"):
-                                plugin_dict[match[2:]] = [match, ver]
-                            else:
-                                plugin_dict[match] = [match, ver]
+                            plugin_dict[match] = [match, ver]
                             print("Registered " + match + " " + ver)
                             break
                         if "Release Notes" in line:
@@ -368,10 +362,7 @@ while len(matches) != 0 or start is True:
                                     while response != 'y' and response != 'n':
                                         response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
                                 if response == 'y' or skip is True:
-                                    if match.startswith("AD"):
-                                        plugin_dict[match[2:]] = [match, plugin_ver]
-                                    else:
-                                        plugin_dict[match] = [match, plugin_ver]
+                                    plugin_dict[match] = [match, plugin_ver]
                                     if skip is True:
                                         print("Registered " + match + " " + plugin_ver)
                                 break
@@ -383,10 +374,7 @@ while len(matches) != 0 or start is True:
                             ver = input("Enter version: ")
                         else:
                             continue
-                        if match.startswith("AD"):
-                            plugin_dict[match[2:]] = [match, ver]
-                        else:
-                            plugin_dict[match] = [match, ver]
+                        plugin_dict[match] = [match, ver]
                 except IOError:
                     release_path = ad_directory + os.sep + match
                     if os.path.isdir(release_path):
@@ -417,10 +405,7 @@ while len(matches) != 0 or start is True:
                                 ver = input("Enter version: ")
                             else:
                                 continue
-                        if match.startswith("AD"):
-                            plugin_dict[match[2:]] = [match, ver]
-                        else:
-                            plugin_dict[match] = [match, ver]
+                        plugin_dict[match] = [match, ver]
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
