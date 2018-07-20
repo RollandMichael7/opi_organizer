@@ -175,6 +175,8 @@ def skipPlugin(path, plugin):
         return True
     if plugin == "dxp" and "dxpSITORO" in path:
         return True
+    if plugin == "seq" and "calc" in path:
+        return True
     return False
 
 
