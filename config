@@ -33,6 +33,15 @@ OPI_DIRECTORY :
 
 # The plugin version here will be used by the script, regardless of whether it is accurate to the local repository.
 
+# To blacklist a plugin, put a "-" character in front. e.g,
+# -ADAndor
+# -asyn
+
+# To register a plugin or module not from github, use "+AD: <name> <version>" or "+EPICS: <name> <version>". e.g,
+# +AD: ADExample R2-2
+# +EPICS: asynchro R3-2
+
+
 # <Plugin name> [: version]
 
 # AreaDetector plugins
@@ -80,8 +89,10 @@ firewireDCAM : R1-0
 pvaDriver
 ADSpinnaker
 
-# some EPICS modules
+
+# EPICS modules
 # used by convert epics
+# +EPICS: seq R1-0
 asyn
 motor
 calc

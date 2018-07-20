@@ -30,6 +30,9 @@ plugin_dict = {
 # list of Area Detector plugins, populated by searching the github repository
 plugin_list = []
 
+# list of plugins to ignore
+blacklist = []
+
 # list of filenames that can not be identified as part of a plugin or ADCore, populated by organize()
 unidentifiedFiles_dict = {
     # filename : path/to/file
@@ -183,6 +186,35 @@ def organize(ad_dir, opi_dir):
                     print("File is already organized.")
 
 
+def registerExtraPlugins(config):
+    print("looking for extra plugins...")
+    for line in open(config):
+        if "#" in line:
+            continue
+        if "+AD: " in line:
+            search = re.search("\+AD: (.*)", line)
+            if search is not None:
+                split = search.group(1).split(" ")
+                if len(split) < 2:
+                    plugin_dict[split[0]] = [split[0], "R1-0"]
+                    print("Could not find version for " + split[0] + ". Defaulting to R1-0")
+                else:
+                    plugin_dict[split[0]] = [split[0], split[1]]
+                    print("Registered additional plugin: " + split[0] + " " + split[1])
+
+def blacklistPlugins(config):
+    print("blacklisting...")
+    for line in open(config):
+        if "#" in line:
+            continue
+        if line.startswith("-"):
+            search = re.search("-([^ ]*)", line)
+            if search is not None:
+                plugin = search.group(1).strip()
+                print("Ignoring " + plugin)
+                blacklist.append(plugin)
+
+
 ########################### MAIN ###########################
 response = ""
 config_path = ""
@@ -209,7 +241,7 @@ elif parsed_args.config != "":
     config_path = parsed_args.config
     if not os.path.isfile(config_path):
         print("Invalid path: " + config_path)
-        config_path = ""
+        exit()
 
 if config_path == "":
     while response != 'y' and response != 'n':
@@ -217,7 +249,9 @@ if config_path == "":
     if response == 'y':
         while not os.path.isfile(config_path):
             config_path = input("Enter path to config file: ")
+
 if config_path != "":
+    blacklistPlugins(config_path)
     for line in open(config_path):
         if foundOPI and foundAD and foundCSS:
             break
@@ -313,6 +347,8 @@ while len(matches) != 0 or start is True:
         break
     matches = re.findall("a href=\"/areaDetector/(.*)\" itemprop", repo)
     for match in matches:
+        if match in blacklist:
+            continue
         skip = False
         ver = ""
         if match != "ADCore" and match != "areaDetector":
@@ -406,6 +442,9 @@ while len(matches) != 0 or start is True:
                             else:
                                 continue
                         plugin_dict[match] = [match, ver]
+
+if config_path != "":
+    registerExtraPlugins(config_path)
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
