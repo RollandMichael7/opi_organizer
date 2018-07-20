@@ -151,7 +151,7 @@ def organize(ad_dir, opi_dir):
                 else:
                     for plugin in plugin_dict.keys():
                         if plugin.casefold() in os.path.join(root, file).casefold():
-                            if plugin == "Andor" and "ADAndor3" in os.path.join(root,file):
+                            if plugin_dict[p][0] == "ADAndor" and "Andor3" in os.path.join(root,file):
                                 continue
                             isPlugin = True
                             # print("Found plugin file: " + file)
@@ -439,12 +439,14 @@ if error is False and not forced:
                 continue
             if choice.lower() == "reg":
                 choice = query
-            register_plugin(choice, None)
+                ver = input("Enter version for " + query + ": ")
+                plugin_dict[query] = [query, ver]
         else:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
-                register_plugin(query, None)
+                ver = input("Enter version for " + query + ": ")
+                plugin_dict[query] = [query, ver]
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
 elif not forced:

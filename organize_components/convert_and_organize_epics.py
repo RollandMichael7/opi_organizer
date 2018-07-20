@@ -370,7 +370,7 @@ if error is False:
         response = ""
         choice = ""
         found = False
-        query = input("Search for a plugin (or enter \"done\" to stop registering plugins): ")
+        query = input('Search for a plugin (or enter "done" to stop registering plugins): ')
         if query.lower() == "done":
             break
         match_list = []
@@ -391,12 +391,14 @@ if error is False:
                 continue
             if choice.lower() == "reg":
                 choice = query
-            register_plugin(choice, None)
+                ver = input("Enter version for " + query + ": ")
+                plugin_dict[query] = [query, ver]
         elif not forced:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
-                register_plugin(query, None)
+                ver = input("Enter version for " + query + ": ")
+                plugin_dict[query] = [query, ver]
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
 elif not forced:
