@@ -392,13 +392,13 @@ if error is False:
             if choice.lower() == "reg":
                 choice = query
                 ver = input("Enter version for " + query + ": ")
-                plugin_dict[query] = [query, ver]
+                plug2ver[query] = ver
         elif not forced:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
                 ver = input("Enter version for " + query + ": ")
-                plugin_dict[query] = [query, ver]
+                plug2ver[query] = ver
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
 elif not forced:
