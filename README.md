@@ -1,15 +1,14 @@
 # opi_organizer #
 
-**OPI Organizer has been split into several "component" scripts which are called in succession by the run.sh bash script.** Two of the components are convert_and_organize_ad.py and convert_and_organize_epics.py which take directories of either AreaDetector plugins or EPICS modules and extract their ADL files, convert them into OPI files, and put them into a target OPI folder in a heirarchy organized by plugin/module and version. In doing so, these scripts require a path to a CS-Studio executable which can perform this conversion. The third component is update_references.py which takes the files sorted by the other two scripts **(the OPIs *must* be in that organization for this script to work)** and updates their references to other OPIs to function in this new directory structure; in doing this, it uses macros (and default values based on the current directory) such that the version of a linked plugin can be chosen at runtime.
+OPI organizer is a tool made of several component scripts which, with their powers combined (along with CS Studio), uses a local installation of areaDetector and EPICS modules to create an organized directory of OPI files which use macros in their cross-references to enable version control.
 
-A config file can be used to choose where to put EPICS OPIs, AreaDetector OPIs, where to get AreaDetector plugins from, where to get EPICS modules from, where CS-Studio is located, and which AD Plugins/EPICS modules to use and which versions are being used. **The (relative or absolute) path to the config file can be used as a command line argument to any of the component scripts (including run.sh)** and will be prompted for otherwise.
-
-**For the script to work properly:**
-* All AreaDetector plugins must be in the same folder
-* All EPICS modules must be in the same folder
-* Folders containing modules and plugins must have the **same exact name as the github repo they come from, OR the github repo's name must be a substring of the local folder's name and the module/plugin must be marked in the config file with a version.**
-* Update_references.py must be run after/with directories created by the other two components
-* The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
+## Requirements ##
+- All areaDetector plugins must be in the same folder
+- All EPICS modules must be in the same folder
+- The names of plugin/module folders must contain the name of the github repo they came from
+  - eg. asyn is fine, asyn-4-33 is fine, EPICSasyn is fine, epics-module-1 is not
+- Update_references.py must be run after/with directories created by the other two components
+- The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
 
 The overall OPI structure must look something like this for the updated references to work (folder names are arbitrary):
 
@@ -35,7 +34,22 @@ EPICS_OPI_DIRECTORY : /home/Epics
 
 The locations of the actual EPICS modules and AreaDetector plugins have no restrictions.
 
-## The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better. ##
+## Usage ##
+It is highly reccomended to use a config file to make running the scripts as painless as possible. An example config file is provided.
+The config file specifies:
+- Location of areaDetector plugins
+- Location of target folder for areaDetector plugin OPIs
+- Location of EPICS modules
+- Location of target folder for EPICS modules OPIs
+- Location of CS Studio executable
+- A whitelist of plugins/modules to register in the organization, with the option to indicate their version (otherwise, the script attempts to identify it with git tags or release files)
+
+After creating your config file, simply run the bash script run.sh with the path to the config file as an argument. The script will attempt to identfiy which modules and plugins are present, and attempt to find their version. If the plugin or module is not present in the whitelist, it will ask if you want to register it. Similarly, it will ask for a version if it can not find one. After all plugins/modules are registered, it identifies & converts ADL files using CS Studio, and moves the resulting OPI files into the new structure. It will then fix all the cross-references in the OPIs, replacing them with a macro specific to each plugin/module which can be used to specify a version once several versions are installed. 
+
+**Use the flag -f [path/to/config] to bypass all prompts; any plugins that are not on the whitelist OR whose version can not be identified WILL NOT be reigstered.**
+
+# Slim and Robust #
+**The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better.**
 ### Slim ###
 Organize Slim only looks at OPI files already put into an OPI folder, automatically converting a "flat" directory into an heirarchial directory. However, if a plugin's name is not in the OPI's name (such as ADBruker's BIS.opi) then the script does not know where to put it unless told by the user.
 
