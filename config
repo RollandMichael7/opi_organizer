@@ -45,101 +45,108 @@ AD_OPI_DIRECTORY :
 
 # <Plugin name> [: version]
 
-# AreaDetector plugins
-# used by convert ad
-+AD: ADCameraLink
-ADCore
-ADADSC
-ADAndor
-ADAndor3
-ADBruker
-ADCSimDetector
-# ADCameralink : R1-0
-# ADCameraLink : R1-0
-ADDexela
-ADEiger
-ADFastCCD : R1-0
-ADFireWireWin
-ADLambda : R1-0
-ADLightField
-ADMerlin
-ADMythen
-ADPCO : R1-0
-ADPICam
-ADPSL
-ADPerkinElmer
-ADPhotonII
-ADPilatus
-ADPixirad
-ADPluginEdge
-ADPointGrey
-ADProsilica
-ADPvCam
-ADQImaging : R1-0
-ADRoper
-ADSimDetector
-ADSupport
-ADURL
-ADViewers
-ADmar345
-ADmarCCD
-ADnED : R1-0
-NDDriverStdArrays
-aravisGigE
-ffmpegServer
-ffmpegViewer : R1-0
-firewireDCAM : R1-0
-pvaDriver
-ADSpinnaker
+# Put areaDetector plugins between this line and END_AD
+# DO NOT REMOVE THESE ENDPOINT LINES
+BEGIN_AD
+
+    ADCore
+    ADADSC
+    ADAndor
+    ADAndor3
+    ADBruker
+    # ADCameraLink : R1-0
+    ADCameralink : R1-0
+    ADCSimDetector
+    ADDexela
+    ADEiger
+    ADFastCCD : R1-0
+    ADFireWireWin
+    ADLambda : R1-0
+    ADLightField
+    ADMerlin
+    ADMythen
+    ADPCO : R1-0
+    ADPICam
+    ADPSL
+    ADPerkinElmer
+    ADPhotonII
+    ADPilatus
+    ADPixirad
+    ADPluginEdge
+    ADPointGrey
+    ADProsilica
+    ADPvCam
+    ADQImaging : R1-0
+    ADRoper
+    ADSimDetector
+    ADSupport
+    ADURL
+    ADViewers
+    ADmar345
+    ADmarCCD
+    ADnED : R1-0
+    NDDriverStdArrays
+    aravisGigE
+    ffmpegServer
+    ffmpegViewer : R1-0
+    firewireDCAM : R1-0
+    pvaDriver
+    ADSpinnaker
+
+END_AD
 
 
-# EPICS modules
-# used by convert epics
-# +EPICS: seq R1-0
-asyn
-motor
-calc
-autosave
-lua
-xxx : R5-8-4
-iocStats
-sscan
-busy
-quadEM
-measComp
-alive
-stream
-camac
-softGlue
-vac
-std : R3-4-1
-caputRecorder
-optics
-ip
-love
-mca
-dxp
-mrfioc2
-devlib2
-xspress3
-softGlueZynq
-vme
-modbus
-ipac
-quadEM
-tpmac
-pcas
-ip330
-dac128V
-ipUnidig
-transRecorder
-TRSIS
-ioczed
-TRGeneralStandards
-TRCore
-gtr
-symb
-MCoreUtils
-delaygen
-Yokogawa_DAS : R1-0
-dxpSITORO
+# Put EPICS modules between this line and END_EPICS
+# DO NOT REMOVE THESE ENDPOINT LINES
+BEGIN_EPICS
+
+    # +EPICS: seq R1-0
+    asyn
+    motor
+    calc
+    autosave
+    lua
+    xxx : R5-8-4
+    iocStats
+    sscan
+    busy
+    quadEM
+    measComp
+    alive
+    stream
+    camac
+    softGlue
+    vac
+    std : R3-4-1
+    caputRecorder
+    optics
+    ip
+    love
+    mca
+    dxp
+    mrfioc2
+    devlib2
+    xspress3
+    softGlueZynq
+    vme
+    modbus
+    ipac
+    quadEM
+    tpmac
+    pcas
+    ip330
+    dac128V
+    ipUnidig
+    transRecorder
+    TRSIS
+    ioczed
+    TRGeneralStandards
+    TRCore
+    gtr
+    symb
+    MCoreUtils
+    delaygen
+    Yokogawa_DAS : R1-0
+    dxpSITORO
+
+END_EPICS

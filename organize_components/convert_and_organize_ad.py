@@ -157,35 +157,47 @@ def skipPlugin(path, plugin):
 
 def registerExtraPlugins(config):
     print("looking for extra plugins...")
+    start = False
     for line in open(config):
         if "#" in line:
             continue
-        if "+AD: " in line:
-            search = re.search("\+AD: (.*)", line)
-            if search is not None:
-                split = search.group(1).split(" ")
-                folder = findFolder(split[0])
-                if folder is None:
-                    print("Could not find a folder for " + split[0] + ".")
-                    continue
-                if len(split) < 2:
-                    ver = "R1-0"
-                    print("Could not find version for " + split[0] + ". Defaulting to R1-0")
-                else:
-                    ver = split[1]
-                register(split[0], ver, folder)
+        if "BEGIN_AD" in line:
+            start = True
+        if "END_AD" in line:
+            return
+        if start:
+            if "+AD: " in line:
+                search = re.search("\+AD: (.*)", line)
+                if search is not None:
+                    split = search.group(1).split(" ")
+                    folder = findFolder(split[0])
+                    if folder is None:
+                        print("Could not find a folder for " + split[0] + ".")
+                        continue
+                    if len(split) < 2:
+                        ver = "R1-0"
+                        print("Could not find version for " + split[0] + ". Defaulting to R1-0")
+                    else:
+                        ver = split[1]
+                    register(split[0], ver, folder)
 
 def blacklistPlugins(config):
     print("blacklisting...")
+    start = False
     for line in open(config):
         if "#" in line:
             continue
-        if line.startswith("-"):
-            search = re.search("-([^ ]*)", line)
-            if search is not None:
-                plugin = search.group(1).strip()
-                print("Ignoring " + plugin)
-                blacklist.append(plugin)
+        if "BEGIN_AD" in line:
+            start = True
+        if "END_AD" in line:
+            return
+        if start:
+            if line.startswith("-"):
+                search = re.search("-([^ ]*)", line)
+                if search is not None:
+                    plugin = search.group(1).strip()
+                    print("Ignoring " + plugin)
+                    blacklist.append(plugin)
 
 
 def register(plugin, ver, folder):
@@ -321,10 +333,10 @@ if not foundCSS and not forced:
 matches = []
 currPage = 0
 error = False
-start = True
+startLoop = True
 print("Detecting plugins...")
-while len(matches) != 0 or start is True:
-    start = False
+while len(matches) != 0 or startLoop is True:
+    startLoop = False
     currPage += 1
     repo_string = 'https://github.com/areaDetector?page=' + str(currPage)
     try:
@@ -345,15 +357,21 @@ while len(matches) != 0 or start is True:
             continue
         plugin_list.append(match)
         if config_path != "":
+            start = False
             for line in open(config_path):
                 if "#" in line:
                     continue
-                if match.casefold() in line.casefold():
-                    skip = True
-                    verSearch = re.search(match + " : " + "(.*)", line)
-                    if verSearch is not None:
-                        ver = verSearch.group(1)
+                if "BEGIN_AD" in line:
+                    start = True
+                if "END_AD" in line:
                     break
+                if start:
+                    if match.casefold() in line.casefold():
+                        skip = True
+                        verSearch = re.search(match + " : " + "(.*)", line)
+                        if verSearch is not None:
+                            ver = verSearch.group(1)
+                        break
         if ver != "":
             register(match, ver, folder)
             continue
@@ -509,4 +527,3 @@ if len(unidentifiedFiles_dict) != 0:
     for file in unidentifiedFiles_dict.keys():
         print("\t" + file + " (" + unidentifiedFiles_dict[file] + ")")
 quit()
-
