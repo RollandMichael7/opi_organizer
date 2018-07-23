@@ -50,10 +50,10 @@ def convert_adls(epics_dir, opi_dir):
         # /path/to/adl/file : [plugin name, plugin version]
     }
     file2plug =  {
-        # converted opi filename : [plugin name, plugin version, plugin key]
+        # converted opi filename : [plugin name, plugin version]
     }
     for folder in folder2plugin.keys():
-        for root, dirs, files in os.walk(folder):
+        for root, dirs, files in os.walk(os.path.join(epics_dir, folder)):
             for file in files:
                 if file.endswith(".adl"):
                     print(file)
@@ -74,7 +74,7 @@ def convert_adls(epics_dir, opi_dir):
                     if os.path.isfile(os.path.join(root,file)[:-4] + ".opi"):
                         os.remove(os.path.join(root,file)[:-4] + ".opi")
                     css_dict[os.path.join(root, file)] = [plugin, ver]
-                    file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
+                    file2plug[file[:-4] + ".opi"] = [plugin, ver]
     if len(css_dict) > 0:
         i = 0
         done = False
