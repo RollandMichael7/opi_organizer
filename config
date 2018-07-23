@@ -100,7 +100,8 @@ END_AD
 # DO NOT REMOVE THESE ENDPOINT LINES
 BEGIN_EPICS
 
-    # +EPICS: seq R1-0
+    +EPICS: seq
+    +EPICS: galil
     asyn
     motor
     calc
