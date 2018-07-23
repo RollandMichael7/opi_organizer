@@ -28,6 +28,9 @@ ref2path = {
 
 # given an OPI file directory created by convert_and_organize.py, update its cross-references.
 def cross_reference(opi_dir):
+    if not os.path.isdir(opi_dir):
+        print("Invalid directory: " + opi_dir)
+        return
     for root, folders, files in os.walk(opi_dir):
         for file in files:
             if file.endswith(".opi"):
@@ -75,13 +78,8 @@ def cross_reference(opi_dir):
                                 plugin = str(folders[len(folders) - 3])
                                 ver = str(folders[len(folders) - 2])
                                 foundIn = ref2path[path][1]
-<<<<<<< HEAD
-                                # if opi_dir == epics_dir and foundIn == ad_dir:
-                                #    pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
-=======
                                 if foundIn == ad_dir:
                                     pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
->>>>>>> master
                             else:
                                 done = False
                                 if path.startswith("AD") or path.startswith("ND"):
@@ -106,13 +104,8 @@ def cross_reference(opi_dir):
                                                 ver = str(folders[len(folders) - 2])
                                                 done = True
                                                 foundIn = lookIn
-<<<<<<< HEAD
-                                                # if opi_dir == epics_dir and foundIn == ad_dir:
-                                                #    pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
-=======
                                                 if foundIn == ad_dir:
                                                     pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
->>>>>>> master
                                                 break
                                     if lookIn == second and not done or (lookIn == first and first == second and not not done):
                                         break
@@ -159,14 +152,9 @@ def add_macros(filePath, macros):
                 macro_str += "\t<" + "path" + macro[:1].upper() + macro[1:] + ">"
                 # if isADet and isLinkToEpics:
                 #     macro_str += ".." + os.sep
-<<<<<<< HEAD
-                macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
-                             + macro + os.sep + macros[macro][0]
-=======
                 #macro_str += ".." + os.sep + ".." + os.sep + ".." + os.sep + macros[macro][1] + os.sep\
                 #             + macro + os.sep + macros[macro][0]
                 macro_str += macros[macro][1] + os.sep + macro + os.sep + macros[macro][0]
->>>>>>> master
                 macro_str += "</" + "path" +  macro[:1].capitalize() + macro[1:] + ">" + "\n"
             sys.stderr.write("Added macros: " + macro_str)
             line = line + macro_str
