@@ -48,10 +48,3 @@ After creating your config file, simply run the bash script run.sh with the path
 
 **Use the flag -f [path/to/config] to bypass all prompts; any plugins that are not on the whitelist OR whose version can not be identified WILL NOT be reigstered.**
 
-# Slim and Robust #
-**The "full" versions of the script are old and buggy. Use the run.sh script to run the components which work much better.**
-### Slim ###
-Organize Slim only looks at OPI files already put into an OPI folder, automatically converting a "flat" directory into an heirarchial directory. However, if a plugin's name is not in the OPI's name (such as ADBruker's BIS.opi) then the script does not know where to put it unless told by the user.
-
-### Robust ###
-Organize Robust searches an entire local Area Detector directory for OPI files, inserting them into the given OPI directory accordingly (in addition to organizing the OPI directory in the same way as Slim). It can also use CS Studio to convert MEDM adl files from the Area Detector directory to create new OPI files and organize them.
