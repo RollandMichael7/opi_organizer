@@ -2,7 +2,7 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.07.16
+# version: 2018.07.23
 
 
 import os
@@ -476,7 +476,6 @@ elif not forced:
         else:
             ver = input("Enter version: ")
             register(plugin, ver, folder)
-            print(plugin + " " + version + " registered.")
             plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 # do the organizing
