@@ -118,7 +118,7 @@ def organize(epics_dir, opi_dir):
         print("Invalid directory: " + opi_dir)
         return
     for folder in folder2plugin.keys():
-        for root, dirs, files in os.walk(folder):
+        for root, dirs, files in os.walk(os.path.join(epics_dir, folder)):
             for file in files:
                 if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
                     old = False
