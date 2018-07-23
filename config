@@ -1,5 +1,4 @@
 # Any combination of these options can be included; none are required.
-# CSS_PATH is ignored by the slim version, and is only used by convert scripts.
 
    # CSS_PATH : C:\Users\mikes\Documents\cs-studio-sns\css.exe
 CSS_PATH :
@@ -20,123 +19,134 @@ AD_DIRECTORY :
     # AD_OPI_DIRECTORY : C:\Users\mikes\Documents\OPIs\ADet\R3-3
 AD_OPI_DIRECTORY :
 
-# used only by organize_robust.py and organize_slim.py
-    # OPI_DIRECTORY : C:\Users\mikes\Documents\OPIs
-OPI_DIRECTORY :
+# All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Blacklisted
+# plugins will be ignored.
 
-# All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Remove any plugin you
-# do not want registered in the search.
-# Plugin names are case sensitive. Each plugin must be on its own line. ADCore does not need to be included. If a version
-# is not included, the script will try to detect it. If it can not detect it, it will prompt you to enter the version.
+# The script will search for a folder containing the plugin's name in the appropriate directory (AD or EPICS). If it
+# can not find one, the plugin will not be registered.
+
+# Each plugin must be on its own line. If a version is not included, the script will try to detect it. If it can not
+# detect the version, it will prompt you to enter one.
+
 # Because the script searches your local directory to confirm the existence of a plugin, putting plugins here that aren't
 # locally available will not cause any issues. An invalid plugin name will be ignored.
 
 # The plugin version here will be used by the script, regardless of whether it is accurate to the local repository.
 
-# To blacklist a plugin, put a "-" character in front. e.g,
+# To blacklist a plugin, put a "-" character in front.
 # -ADAndor
 # -asyn
 
-# To register a plugin or module not from github, use "+AD: <name> <version>" or "+EPICS: <name> <version>". e.g,
+# To register a plugin or module not from github, use "+AD: <name> <version>" or "+EPICS: <name> <version>"
+# Without a version, it will default to R1-0
 # +AD: ADExample R2-2
-# +EPICS: asynchro R3-2
+# +EPICS: seq R2-2-5
 
 
 # <Plugin name> [: version]
 
-# AreaDetector plugins
-# used by robust, slim, and convert ad
-ADADSC
-ADAndor
-ADAndor3
-ADBruker
-ADCSimDetector
-ADCameralink : R1-0
-ADCameraLink : R1-0
-ADDexela
-ADEiger
-ADFastCCD : R1-0
-ADFireWireWin
-ADLambda : R1-0
-ADLightField
-ADMerlin
-ADMythen
-ADPCO : R1-0
-ADPICam
-ADPSL
-ADPerkinElmer
-ADPhotonII
-ADPilatus
-ADPixirad
-ADPluginEdge
-ADPointGrey
-ADProsilica
-ADPvCam
-ADQImaging : R1-0
-ADRoper
-ADSimDetector
-ADSupport
-ADURL
-ADViewers
-ADmar345
-ADmarCCD
-ADnED : R1-0
-NDDriverStdArrays
-aravisGigE
-ffmpegServer
-ffmpegViewer : R1-0
-firewireDCAM : R1-0
-pvaDriver
-ADSpinnaker
+# Put areaDetector plugins between this line and END_AD
+# DO NOT REMOVE THESE ENDPOINT LINES
+BEGIN_AD
+
+    ADCore
+    ADADSC
+    ADAndor
+    ADAndor3
+    ADBruker
+    # ADCameraLink : R1-0
+    ADCameralink : R1-0
+    ADCSimDetector
+    ADDexela
+    ADEiger
+    ADFastCCD : R1-0
+    ADFireWireWin
+    ADLambda : R1-0
+    ADLightField
+    ADMerlin
+    ADMythen
+    ADPCO : R1-0
+    ADPICam
+    ADPSL
+    ADPerkinElmer
+    ADPhotonII
+    ADPilatus
+    ADPixirad
+    ADPluginEdge
+    ADPointGrey
+    ADProsilica
+    ADPvCam
+    ADQImaging : R1-0
+    ADRoper
+    ADSimDetector
+    ADSupport
+    ADURL
+    ADViewers
+    ADmar345
+    ADmarCCD
+    ADnED : R1-0
+    NDDriverStdArrays
+    aravisGigE
+    ffmpegServer
+    ffmpegViewer : R1-0
+    firewireDCAM : R1-0
+    pvaDriver
+    ADSpinnaker
+
+END_AD
 
 
-# EPICS modules
-# used by convert epics
-# +EPICS: seq R1-0
-asyn
-motor
-calc
-autosave
-lua
-xxx : R5-8-4
-iocStats
-sscan
-busy
-quadEM
-measComp
-alive
-stream
-camac
-softGlue
-vac
-std : R3-4-1
-caputRecorder
-optics
-ip
-love
-mca
-dxp
-mrfioc2
-devlib2
-xspress3
-softGlueZynq
-vme
-modbus
-ipac
-quadEM
-tpmac
-pcas
-ip330
-dac128V
-ipUnidig
-transRecorder
-TRSIS
-ioczed
-TRGeneralStandards
-TRCore
-gtr
-symb
-MCoreUtils
-delaygen
-Yokogawa_DAS : R1-0
-dxpSITORO
+# Put EPICS modules between this line and END_EPICS
+# DO NOT REMOVE THESE ENDPOINT LINES
+BEGIN_EPICS
+
+    # +EPICS: seq R1-0
+    asyn
+    motor
+    calc
+    autosave
+    lua
+    xxx : R5-8-4
+    iocStats
+    sscan
+    busy
+    quadEM
+    measComp
+    alive
+    stream
+    camac
+    softGlue
+    vac
+    std : R3-4-1
+    caputRecorder
+    optics
+    ip
+    love
+    mca
+    dxp
+    mrfioc2
+    devlib2
+    xspress3
+    softGlueZynq
+    vme
+    modbus
+    ipac
+    quadEM
+    tpmac
+    pcas
+    ip330
+    dac128V
+    ipUnidig
+    transRecorder
+    TRSIS
+    ioczed
+    TRGeneralStandards
+    TRCore
+    gtr
+    symb
+    MCoreUtils
+    delaygen
+    Yokogawa_DAS : R1-0
+    dxpSITORO
+
+END_EPICS

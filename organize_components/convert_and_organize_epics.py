@@ -2,7 +2,7 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.07.16
+# version: 2018.07.23
 
 
 import os
@@ -163,46 +163,63 @@ def skipPlugin(path, plugin):
 
 def registerExtraPlugins(config):
     print("looking for extra modules...")
+    start = False
     for line in open(config):
         if "#" in line:
             continue
-        if "+EPICS: " in line:
-            search = re.search("\+EPICS: (.*)", line)
-            if search is not None:
-                folder = ""
-                split = search.group(1).split(" ")
-                for f in os.listdir(epics_directory):
-                    if split[0] in f:
-                        folder = f
-                        break
-                if folder == "":
-                    print("Could not find a folder for " + split[0] + ".")
-                    continue
-                if len(split) < 2:
-                    ver = "R1-0"
-                    print("Could not find version for " + split[0] + ". Defaulting to R1-0")
-                else:
-                    ver = split[1]
-                register(split[0], ver, folder)
+        if "BEGIN_EPICS" in line:
+            start = True
+        if "END_EPICS" in line:
+            return
+        if start:
+            if "+EPICS: " in line:
+                search = re.search("\+EPICS: (.*)", line)
+                if search is not None:
+                    split = search.group(1).split(" ")
+                    folder = findFolder(split[0])
+                    if folder is None:
+                        print("Could not find a folder for " + split[0] + ".")
+                        continue
+                    if len(split) < 2:
+                        ver = "R1-0"
+                        print("Could not find version for " + split[0] + ". Defaulting to R1-0")
+                    else:
+                        ver = split[1]
+                    register(split[0], ver, folder)
 
 
 def blacklistPlugins(config):
     print("blacklisting...")
+    start = False
     for line in open(config):
         if "#" in line:
             continue
-        if line.startswith("-"):
-            search = re.search("-([^ ]*)", line)
-            if search is not None:
-                plugin = search.group(1).strip()
-                print("Ignoring " + plugin)
-                blacklist.append(plugin)
+        if "BEGIN_EPICS" in line:
+            start = True
+        if "END_EPICS" in line:
+            return
+        if start:
+            if line.startswith("-"):
+                search = re.search("-([^ ]*)", line)
+                if search is not None:
+                    plugin = search.group(1).strip()
+                    print("Ignoring " + plugin)
+                    blacklist.append(plugin)
 
 
 def register(plugin, ver, folder):
     plug2ver[plugin] = ver
     folder2plugin[folder] = plugin
     print("Registered " + plugin + " " + ver + " in " + folder)
+
+
+def findFolder(plugin):
+    for folder in os.listdir(epics_directory):
+        if skipPlugin(folder, plugin):
+            continue
+        if plugin.casefold() in folder.casefold():
+            return folder
+    return None
 
 
 ########################### MAIN ###########################
@@ -304,10 +321,10 @@ if not foundCSS and not forced:
 matches = []
 currPage = 0
 error = False
-start = True
+startLoop = True
 print("Detecting plugins...")
-while len(matches) != 0 or start is True:
-    start = False
+while len(matches) != 0 or startLoop is True:
+    startLoop = False
     currPage += 1
     repo_string = 'https://github.com/epics-modules?page=' + str(currPage)
     try:
@@ -318,31 +335,31 @@ while len(matches) != 0 or start is True:
         break
     matches = re.findall("a href=\"/epics-modules/(.*)\" itemprop", repo)
     for match in matches:
-        folder = ""
         if match in blacklist:
             continue
-        for f in os.listdir(epics_directory):
-            if skipPlugin(f, match):
-                continue
-            if match.casefold() in f.casefold():
-                folder = f
-                break
-        if folder == "":
+        folder = findFolder(match)
+        if folder is None:
             continue
         plugin_list.append(match)
         found = False
         ver = ""
         response = ""
         if config_path != "":
+            start = False
             for line in open(config_path):
                 if "#" in line:
                     continue
-                if match in line:
-                    found = True
-                    verSearch = re.search(match + " : " + "(.*)", line)
-                    if verSearch is not None:
-                        ver = verSearch.group(1)
+                if "BEGIN_EPICS" in line:
+                    start = True
+                if "END_EPICS" in line:
                     break
+                if start:
+                    if match in line:
+                        found = True
+                        verSearch = re.search(match + " : " + "(.*)", line)
+                        if verSearch is not None:
+                            ver = verSearch.group(1)
+                        break
             if found and ver != "":
                 register(match, ver, folder)
         if ver == "":
@@ -416,13 +433,8 @@ if error is False:
                 found = True
                 match_list.append(plugin)
                 if query.casefold() == plugin.casefold():
-                    for f in os.listdir(epics_directory):
-                        if skipPlugin(f, plugin):
-                            continue
-                        if plugin in f:
-                            folder = f
-                            break
-                    if folder == "":
+                    folder = findFolder(plugin)
+                    if folder is None:
                         print("No folder found for " + plugin)
                     else:
                         ver = input("Enter version for " + plugin + ": ")
@@ -438,11 +450,8 @@ if error is False:
             else:
                 if choice.lower() == "reg":
                     choice = query
-                for f in os.listdir(epics_directory):
-                    if choice in f:
-                        folder = f
-                        break
-                if folder == "":
+                folder = findFolder(choice)
+                if folder is None:
                     print("Could not find a folder for " + choice)
                 else:
                     ver = input("Enter version for " + choice + ": ")
@@ -451,11 +460,8 @@ if error is False:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
-                for f in os.listdir(epics_directory):
-                    if query in f:
-                        folder = f
-                        break
-                if folder == "":
+                folder = findFolder(query)
+                if folder is None:
                     print("Could not find a folder for " + query + ".")
                 else:
                     ver = input("Enter version for " + query + ": ")
@@ -466,18 +472,13 @@ elif not forced:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":
-        folder = ""
-        for f in os.listdir(epics_directory):
-            if plugin in f:
-                folder = f
-                break
-        if folder == "":
+        folder = findFolder(plugin)
+        if folder is None:
             print("Could not find a folder for " + plugin + ".")
         else:
             ver = input("Enter version: ")
             register(plugin, ver, folder)
-            print(plugin + " " + version + " registered.")
-            plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
+        plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 # do the organizing
 if css_path != "":
@@ -494,4 +495,3 @@ if len(unidentifiedFiles_dict) != 0:
     for file in unidentifiedFiles_dict.keys():
         print("\t" + file + " (" + unidentifiedFiles_dict[file] + ")")
 quit()
-
