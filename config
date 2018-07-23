@@ -33,11 +33,12 @@ AD_OPI_DIRECTORY :
 
 # The plugin version here will be used by the script, regardless of whether it is accurate to the local repository.
 
-# To blacklist a plugin, put a "-" character in front. e.g,
+# To blacklist a plugin, put a "-" character in front.
 # -ADAndor
 # -asyn
 
-# To register a plugin or module not from github, use "+AD: <name> <version>" or "+EPICS: <name> <version>". e.g,
+# To register a plugin or module not from github, use "+AD: <name> <version>" or "+EPICS: <name> <version>"
+# Without a version, it will default to R1-0
 # +AD: ADExample R2-2
 # +EPICS: seq R2-2-5
 
@@ -46,14 +47,15 @@ AD_OPI_DIRECTORY :
 
 # AreaDetector plugins
 # used by convert ad
++AD: ADCameraLink
 ADCore
 ADADSC
 ADAndor
 ADAndor3
 ADBruker
 ADCSimDetector
-ADCameralink : R1-0
-ADCameraLink : R1-0
+# ADCameralink : R1-0
+# ADCameraLink : R1-0
 ADDexela
 ADEiger
 ADFastCCD : R1-0
