@@ -163,13 +163,9 @@ def registerExtraPlugins(config):
         if "+AD: " in line:
             search = re.search("\+AD: (.*)", line)
             if search is not None:
-                folder = ""
                 split = search.group(1).split(" ")
-                for f in os.listdir(ad_directory):
-                    if split[0] in f:
-                        folder = f
-                        break
-                if folder == "":
+                folder = findFolder(split[0])
+                if folder is None:
                     print("Could not find a folder for " + split[0] + ".")
                     continue
                 if len(split) < 2:
@@ -196,6 +192,15 @@ def register(plugin, ver, folder):
     plug2ver[plugin] = ver
     folder2plugin[folder] = plugin
     print("Registered " + plugin + " " + ver + " in " + folder)
+
+
+def findFolder(plugin):
+    for folder in os.listdir(ad_directory):
+        if skipPlugin(folder, plugin):
+            continue
+        if plugin.casefold() in folder.casefold():
+            return folder
+    return None
 
 
 ########################### MAIN ###########################
@@ -334,15 +339,9 @@ while len(matches) != 0 or start is True:
             continue
         skip = False
         ver = ""
-        folder = ""
         response = ""
-        for f in os.listdir(ad_directory):
-            if skipPlugin(f, match):
-                continue
-            if match in f:
-                folder = f
-                break
-        if folder == "":
+        folder = findFolder(match)
+        if folder is None:
             continue
         plugin_list.append(match)
         if config_path != "":
@@ -448,13 +447,8 @@ if error is False:
                 found = True
                 match_list.append(plugin)
                 if query.casefold() == plugin.casefold():
-                    for f in os.listdir(ad_directory):
-                        if skipPlugin(f, plugin):
-                            continue
-                        if plugin in f:
-                            folder = f
-                            break
-                    if folder == "":
+                    folder = findFolder(plugin)
+                    if folder is None:
                         print("No folder found for " + plugin)
                     else:
                         ver = input("Enter version for " + plugin + ": ")
@@ -470,11 +464,8 @@ if error is False:
             else:
                 if choice.lower() == "reg":
                     choice = query
-                for f in os.listdir(ad_directory):
-                    if choice in f:
-                        folder = f
-                        break
-                if folder == "":
+                folder = findFolder(choice)
+                if folder is None:
                     print("Could not find a folder for " + choice)
                 else:
                     ver = input("Enter version for " + choice + ": ")
@@ -483,11 +474,8 @@ if error is False:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
-                for f in os.listdir(ad_directory):
-                    if query in f:
-                        folder = f
-                        break
-                if folder == "":
+                folder = findFolder(query)
+                if folder is None:
                     print("Could not find a folder for " + query + ".")
                 else:
                     ver = input("Enter version for " + query + ": ")
@@ -498,17 +486,13 @@ elif not forced:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":
-        folder = ""
-        for f in os.listdir(ad_directory):
-            if plugin in f:
-                folder = f
-                break
-        if folder == "":
+        folder = findFolder(plugin)
+        if folder is None:
             print("Could not find a folder for " + plugin + ".")
         else:
             ver = input("Enter version: ")
             register(plugin, ver, folder)
-            plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
+        plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 # do the organizing
 if css_path != "":
