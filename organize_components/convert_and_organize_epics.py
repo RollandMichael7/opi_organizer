@@ -22,6 +22,9 @@ plug2ver = {
 # list of EPICS modules, populated by searching the github repository
 plugin_list = []
 
+# dict matches folder to EPICS module
+folder2plugin = {}
+
 # list of plugins to ignore
 blacklist = []
 
@@ -49,26 +52,16 @@ def convert_adls(epics_dir, opi_dir):
     file2plug =  {
         # converted opi filename : [plugin name, plugin version, plugin key]
     }
-    for root, dirs, files in os.walk(epics_dir):
-        for file in files:
-            if file.endswith(".adl"):
-                print(file)
-                plugin = ""
-                ver = ""
-                tag = ""
-                # identify which plugin the adl belongs to
-                for p in plug2ver.keys():
-                    path = os.path.join(root, file)
-                    if p.casefold() in path.casefold():
-                        if skipPlugin(path, p):
-                            continue
-                        plugin = p
-                        ver = plug2ver[p]
-                        tag = p
-                        break
-                # if it was identified, check if its already been converted previously
-                # (to avoid executing CS Studio too much)
-                if plugin != "" and ver != "":
+    for folder in folder2plugin.keys():
+        for root, dirs, files in os.walk(folder):
+            for file in files:
+                if file.endswith(".adl"):
+                    print(file)
+                    # identify which plugin the adl belongs to
+                    plugin = folder2plugin[folder]
+                    ver = plug2ver[plugin]
+                    # if it was identified, check if its already been converted previously
+                    # (to avoid executing CS Studio too much)
                     newPath = opi_dir + os.sep + plugin + os.sep + ver
                     opi = file[:-4] + ".opi"
                     # if <filename>.opi already exists in the OPI folder, it has been converted and moved
@@ -124,48 +117,35 @@ def organize(epics_dir, opi_dir):
     if not os.path.isdir(opi_dir):
         print("Invalid directory: " + opi_dir)
         return
-    ver = ""
-    dirName = ""
-    for root, dirs, files in os.walk(epics_dir):
-        for file in files:
-            if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
-                old = False
-                if opi_dir in os.path.join(root, file):
-                    old = True
-                # check if the opi file matches one of the
-                # plugins being searched for
-                isPlugin = False
-                for plugin in plug2ver.keys():
-                    if plugin.casefold() in os.path.join(root, file).casefold():
-                        if skipPlugin(os.path.join(root, file), plugin):
-                            continue
-                        isPlugin = True
-                        dirName = plugin
-                        ver = plug2ver[plugin]
-                        print("Found " + dirName + " file: " + file + " (" + os.path.join(root, file) + ")")
-                        break
-                if isPlugin is False:
-                    unidentifiedFiles_dict[file] = os.path.join(root, file)
-                    continue
-                # construct new location of organized file
-                newPath = opi_directory + os.sep + dirName + os.sep + ver
-                oldPath = os.path.join(root, file)
-                # print("current path: " + oldPath)
-                if not os.path.exists(newPath):  # create new folder if it doesn't exist
-                    os.makedirs(newPath)
-                newPath = newPath + os.sep + file
-                if oldPath != newPath and not os.path.isfile(newPath):  # if the file isn't already in its folder, move it
-                    if not old:
-                        print("File copied")
-                        copyfile(oldPath, newPath)
+    for folder in folder2plugin.keys():
+        for root, dirs, files in os.walk(folder):
+            for file in files:
+                if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
+                    old = False
+                    if opi_dir in os.path.join(root, file):
+                        old = True
+                    plugin = folder2plugin[folder]
+                    ver = plug2ver[plugin]
+                    print("Found " + plugin + " file: " + file + " (" + os.path.join(root, file) + ")")
+                    # construct new location of organized file
+                    newPath = opi_directory + os.sep + plugin + os.sep + ver
+                    oldPath = os.path.join(root, file)
+                    # print("current path: " + oldPath)
+                    if not os.path.exists(newPath):  # create new folder if it doesn't exist
+                        os.makedirs(newPath)
+                    newPath = newPath + os.sep + file
+                    if oldPath != newPath and not os.path.isfile(newPath):  # if the file isn't already in its folder, move it
+                        if not old:
+                            print("File copied")
+                            copyfile(oldPath, newPath)
+                        else:
+                            try:
+                                os.rename(oldPath, newPath)
+                                print("File moved")
+                            except FileExistsError:
+                                print("File already exists. " + newPath)
                     else:
-                        try:
-                            os.rename(oldPath, newPath)
-                            print("File moved")
-                        except FileExistsError:
-                            print("File already exists. " + newPath)
-                else:
-                    print("File is already organized.")
+                        print("File is already organized.")
 
 
 def skipPlugin(path, plugin):
@@ -189,13 +169,22 @@ def registerExtraPlugins(config):
         if "+EPICS: " in line:
             search = re.search("\+EPICS: (.*)", line)
             if search is not None:
+                folder = ""
                 split = search.group(1).split(" ")
+                for f in os.listdir(epics_directory):
+                    if split[0] in f:
+                        folder = f
+                        break
+                if folder == "":
+                    print("Could not find a folder for " + split[0] + ".")
+                    continue
                 if len(split) < 2:
-                    plug2ver[split[0]] = "R1-0"
+                    ver = "R1-0"
                     print("Could not find version for " + split[0] + ". Defaulting to R1-0")
                 else:
-                    plug2ver[split[0]] = split[1]
-                    print("Registered additional plugin: " + split[0] + " " + split[1])
+                    ver = split[1]
+                register(split[0], ver, folder)
+
 
 def blacklistPlugins(config):
     print("blacklisting...")
@@ -208,6 +197,12 @@ def blacklistPlugins(config):
                 plugin = search.group(1).strip()
                 print("Ignoring " + plugin)
                 blacklist.append(plugin)
+
+
+def register(plugin, ver, folder):
+    plug2ver[plugin] = ver
+    folder2plugin[folder] = plugin
+    print("Registered " + plugin + " " + ver + " in " + folder)
 
 
 ########################### MAIN ###########################
@@ -323,7 +318,16 @@ while len(matches) != 0 or start is True:
         break
     matches = re.findall("a href=\"/epics-modules/(.*)\" itemprop", repo)
     for match in matches:
+        folder = ""
         if match in blacklist:
+            continue
+        for f in os.listdir(epics_directory):
+            if skipPlugin(f, match):
+                continue
+            if match.casefold() in f.casefold():
+                folder = f
+                break
+        if folder == "":
             continue
         plugin_list.append(match)
         found = False
@@ -340,64 +344,53 @@ while len(matches) != 0 or start is True:
                         ver = verSearch.group(1)
                     break
             if found and ver != "":
-                print("Registered " + match + " " + ver)
-            plug2ver[match] = ver
+                register(match, ver, folder)
         if ver == "":
-            folderName = ""
-            for folder in os.listdir(epics_directory):
-                if match.casefold() in folder.casefold():
-                    if skipPlugin(folder, match):
-                        continue
-                    folderName = folder
-                    break
-            if folderName != "":
-                release_path = epics_directory + os.sep + folderName
-                if os.path.isdir(release_path):
-                    dirPath = os.path.abspath(release_path) + os.sep + ".git"
-                    try:
-                        command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
-                        output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                        verSearch = re.search("(\d+\.\d+(?:\.\d+)*)", output)
-                    except FileNotFoundError:
-                        output = ""
-                        verSearch = None
-                        print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
+            release_path = epics_directory + os.sep + folder
+            if os.path.isdir(release_path):
+                dirPath = os.path.abspath(release_path) + os.sep + ".git"
+                try:
+                    command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+                    output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    verSearch = re.search("(\d+\.\d+(?:\.\d+)*)", output)
+                except FileNotFoundError:
+                    output = ""
+                    verSearch = None
+                    print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
+                if verSearch is not None:
+                    ver = verSearch.group(1)
+                    ver = "R" + ver
+                    # print("version: " + ver)
+                    response = ""
+                    if not found and not forced:
+                        while response != 'y' and response != 'n':
+                            response = input("Register " + match + " " + ver + "? (y/n) ")
+                        if response == 'y':
+                            register(match, ver, folder)
+                    elif found:
+                        register(match, ver, folder)
+                else:
+                    if output != "":
+                        verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
                     if verSearch is not None:
                         ver = verSearch.group(1)
                         ver = "R" + ver
-                        # print("version: " + ver)
-                        response = ""
                         if not found and not forced:
+                            response = ""
                             while response != 'y' and response != 'n':
                                 response = input("Register " + match + " " + ver + "? (y/n) ")
                             if response == 'y':
-                                plug2ver[match] = ver
+                                register(match, ver, folder)
                         elif found:
-                            print("Registered " + match + " " + ver)
-                            plug2ver[match] = ver
+                            register(match, ver, folder)
                     else:
-                        if output != "":
-                            verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
-                        if verSearch is not None:
-                            ver = verSearch.group(1)
-                            ver = "R" + ver
-                            if not found and not forced:
-                                response = ""
-                                while response != 'y' and response != 'n':
-                                    response = input("Register " + match + " " + ver + "? (y/n) ")
-                                if response == 'y':
-                                    plug2ver[match] = ver
-                            elif found:
-                                print("Registered " + match + " " + ver)
-                                plug2ver[match] = ver
-                        else:
-                            if not forced:
-                                while response != 'y' and response != 'n':
-                                    response = input("Detected " + match + " but could not find version. Register and "
-                                                     "confirm version? (y/n) ").lower()
-                                if response == 'y':
-                                    ver = input("Enter version: ")
-                                    plug2ver[match] = ver
+                        if not forced:
+                            while response != 'y' and response != 'n':
+                                response = input("Detected " + match + " but could not find version. Register and "
+                                                 "confirm version? (y/n) ").lower()
+                            if response == 'y':
+                                ver = input("Enter version: ")
+                                register(match, ver, folder)
 
 if config_path != "":
     registerExtraPlugins(config_path)
@@ -410,6 +403,7 @@ if error is False:
     substr = ""
     query = ""
     while query != "done" and not forced:
+        folder = ""
         response = ""
         choice = ""
         found = False
@@ -422,8 +416,17 @@ if error is False:
                 found = True
                 match_list.append(plugin)
                 if query.casefold() == plugin.casefold():
-                    print(plugin + " found.")
-                    choice = plugin
+                    for f in os.listdir(epics_directory):
+                        if skipPlugin(f, plugin):
+                            continue
+                        if plugin in f:
+                            folder = f
+                            break
+                    if folder == "":
+                        print("No folder found for " + plugin)
+                    else:
+                        ver = input("Enter version for " + plugin + ": ")
+                        register(plugin, ver, folder)
                     break
                 print(plugin)
         if found is True and not forced:
@@ -432,26 +435,49 @@ if error is False:
                                ' to register search term): ')
             if choice.lower() == "back":
                 continue
-            if choice.lower() == "reg":
-                choice = query
-                ver = input("Enter version for " + query + ": ")
-                plug2ver[query] = ver
+            else:
+                if choice.lower() == "reg":
+                    choice = query
+                for f in os.listdir(epics_directory):
+                    if choice in f:
+                        folder = f
+                        break
+                if folder == "":
+                    print("Could not find a folder for " + choice)
+                else:
+                    ver = input("Enter version for " + choice + ": ")
+                    register(choice, ver, folder)
         elif not forced:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
-                ver = input("Enter version for " + query + ": ")
-                plug2ver[query] = ver
+                for f in os.listdir(epics_directory):
+                    if query in f:
+                        folder = f
+                        break
+                if folder == "":
+                    print("Could not find a folder for " + query + ".")
+                else:
+                    ver = input("Enter version for " + query + ": ")
+                    register(query, ver, folder)
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
 elif not forced:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":
-        version = input("Enter version: ")
-        plug2ver[plugin] = version
-        print(plugin + " " + version + " added to search")
-        plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
+        folder = ""
+        for f in os.listdir(epics_directory):
+            if plugin in f:
+                folder = f
+                break
+        if folder == "":
+            print("Could not find a folder for " + plugin + ".")
+        else:
+            ver = input("Enter version: ")
+            register(plugin, ver, folder)
+            print(plugin + " " + version + " registered.")
+            plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 # do the organizing
 if css_path != "":
