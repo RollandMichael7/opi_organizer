@@ -5,8 +5,9 @@ OPI organizer is a tool made of several component scripts which, with their powe
 ## Requirements ##
 - All areaDetector plugins must be in the same folder
 - All EPICS modules must be in the same folder
-- The names of plugin/module folders must contain the name of the github repo they came from
+- The names of plugin/module folders must contain the name of the github repo they came from in order to be detected
   - eg. asyn is fine, asyn-4-33 is fine, EPICSasyn is fine, epics-module-1 is not
+- Plugins/modules not obtained from github must be entered manually at runtime or in the config file
 - Update_references.py must be run after/with directories created by the other two components
 - The version of CS-Studio being used must support the adl2boy feature; the nightly build of the SNS version is recommended: https://ics-web.sns.ornl.gov/css/products.html
 
@@ -43,6 +44,8 @@ The config file specifies:
 - Location of target folder for EPICS modules OPIs
 - Location of CS Studio executable
 - A whitelist of plugins/modules to register in the organization, with the option to indicate their version (otherwise, the script attempts to identify it with git tags or release files)
+- A blacklist of plugins/modules to ignore
+- Additional plugins/modules that are obtained from somewhere other than github
 
 After creating your config file, simply run the bash script run.sh with the path to the config file as an argument. The script will attempt to identfiy which modules and plugins are present, and attempt to find their version. If the plugin or module is not present in the whitelist, it will ask if you want to register it. Similarly, it will ask for a version if it can not find one. After all plugins/modules are registered, it identifies & converts ADL files using CS Studio, and moves the resulting OPI files into the new structure. It will then fix all the cross-references in the OPIs, replacing them with a macro specific to each plugin/module which can be used to specify a version once several versions are installed. 
 
