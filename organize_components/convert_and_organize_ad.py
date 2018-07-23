@@ -16,15 +16,13 @@ from urllib.error import URLError
 from urllib.request import urlopen
 from shutil import copyfile
 
-# example dict of some Area Detector plugins
-# dict matches filename substring with plugin name and version
-plugin_dict = {
-    # "andor"      : ["ADAndor3", "R2-2"],
-    # "dexela"     : ["ADDexela", "R2-1"],
-    # "eiger"      : ["ADEiger", "R2-5"],
-    # "pilatus"    : ["ADPilatus", "R2-5"],
-    # "prosilica"  : ["ADProsilica", "R2-4"],
-    # "simdetector": ["ADSimDetector", "R2-7"],
+# dict matches plugin name with plugin version
+plug2ver = {
+    # plugin name : plugin version
+}
+
+folder2plugin = {
+    # folder name : plugin name
 }
 
 # list of Area Detector plugins, populated by searching the github repository
@@ -54,30 +52,16 @@ def convert_adls(ad_dir, opi_dir):
     file2plug =  {
         # converted opi filename : [plugin name, plugin version, plugin key]
     }
-    for root, dirs, files in os.walk(ad_dir):
-        for file in files:
-            if file.endswith(".adl"):
-                print(file)
-                plugin = ""
-                ver = ""
-                tag = ""
-                # identify which plugin the adl belongs to
-                if "ADCore" in os.path.join(root, file):
-                    plugin = "ADCore"
-                    ver = ADCore_ver
-                    tag = None
-                else:
-                    for p in plugin_dict.keys():
-                        if plugin_dict[p][0].casefold() in os.path.join(root, file).casefold():
-                            if plugin_dict[p][0] == "ADAndor" and "Andor3" in os.path.join(root, file):
-                                continue
-                            plugin = plugin_dict[p][0]
-                            ver = plugin_dict[p][1]
-                            tag = p
-                            break
-                # if it was identified, check if its already been converted previously
-                # (to avoid executing CS Studio too much)
-                if plugin != "" and ver != "":
+    for folder in folder2plugin.keys():
+        for root, dirs, files in os.walk(os.path.join(ad_dir, folder)):
+            for file in files:
+                if file.endswith(".adl"):
+                    print(file)
+                    # identify which plugin the adl belongs to
+                    plugin = folder2plugin[folder]
+                    ver = plug2ver[plugin]
+                    # if it was identified, check if its already been converted previously
+                    # (to avoid executing CS Studio too much)
                     newPath = opi_dir + os.sep + plugin + os.sep + ver
                     opi = file[:-4] + ".opi"
                     # if <filename>.opi already exists in the OPI folder, it has been converted and moved
@@ -90,9 +74,7 @@ def convert_adls(ad_dir, opi_dir):
                     if os.path.isfile(os.path.join(root,file)[:-4] + ".opi"):
                         os.remove(os.path.join(root,file)[:-4] + ".opi")
                     css_dict[os.path.join(root, file)] = [plugin, ver]
-                    if plugin != "ADCore":
-                        file2plug[file[:-4] + ".opi"] = [plugin, ver, tag]
-                        # print("key: " + file[:-4] + ".opi")
+                    file2plug[file[:-4] + ".opi"] = [plugin, ver]
     if len(css_dict) > 0:
         i = 0
         done = False
@@ -136,54 +118,41 @@ def organize(ad_dir, opi_dir):
     if not os.path.isdir(opi_dir):
         print("Invalid directory: " + opi_dir)
         return
-    ver = ""
-    dirName = ""
-    for root, dirs, files in os.walk(ad_dir):
-        for file in files:
-            if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
-                old = False
-                if opi_dir in os.path.join(root, file):
-                    old = True
-                # check if the opi file matches one of the
-                # plugins being searched for
-                isPlugin = False
-                if "ADCore" in os.path.join(root, file):
-                    dirName = "ADCore"
-                    ver = ADCore_ver
-                    print("Found ADCore file: " + file + " (" + os.path.join(root, file) + ")")
-                else:
-                    for plugin in plugin_dict.keys():
-                        if plugin.casefold() in os.path.join(root, file).casefold():
-                            if plugin_dict[plugin][0] == "ADAndor" and "Andor3" in os.path.join(root,file):
-                                continue
-                            isPlugin = True
-                            # print("Found plugin file: " + file)
-                            dirName = plugin_dict.get(plugin)[0]
-                            ver = plugin_dict.get(plugin)[1]
-                            print("Found " + dirName + " file: " + file + " (" + os.path.join(root, file) + ")")
-                            break
-                if isPlugin is False and dirName != "ADCore":
-                    unidentifiedFiles_dict[file] = os.path.join(root, file)
-                    continue
-                # construct new location of organized file
-                newPath = opi_directory + os.sep + dirName + os.sep + ver
-                oldPath = os.path.join(root, file)
-                # print("current path: " + oldPath)
-                if not os.path.exists(newPath):  # create new folder if it doesn't exist
-                    # print("making new folder...")
-                    os.makedirs(newPath)
-                newPath = newPath + os.sep + file
-                if oldPath != newPath and not os.path.isfile(newPath):  # if the file isn't already in its folder, move it
-                    # print("new path: " + newPath)
-                    # print("old path: " + oldPath)
-                    if not old:
-                        print("File copied")
-                        copyfile(oldPath, newPath)
+    for folder in folder2plugin.keys():
+        for root, dirs, files in os.walk(os.path.join(ad_dir, folder)):
+            for file in files:
+                if os.path.isfile(os.path.join(root, file)) and file.endswith('.opi'):
+                    old = False
+                    if opi_dir in os.path.join(root, file):
+                        old = True
+                    plugin = folder2plugin[folder]
+                    ver = plug2ver[plugin]
+                    print("Found " + plugin + " file: " + file + " (" + os.path.join(root, file) + ")")
+                    # construct new location of organized file
+                    newPath = opi_directory + os.sep + plugin + os.sep + ver
+                    oldPath = os.path.join(root, file)
+                    # print("current path: " + oldPath)
+                    if not os.path.exists(newPath):  # create new folder if it doesn't exist
+                        # print("making new folder...")
+                        os.makedirs(newPath)
+                    newPath = newPath + os.sep + file
+                    if oldPath != newPath and not os.path.isfile(newPath):  # if the file isn't already in its folder, move it
+                        # print("new path: " + newPath)
+                        # print("old path: " + oldPath)
+                        if not old:
+                            print("File copied")
+                            copyfile(oldPath, newPath)
+                        else:
+                            print("File moved")
+                            os.rename(oldPath, newPath)
                     else:
-                        print("File moved")
-                        os.rename(oldPath, newPath)
-                else:
-                    print("File is already organized.")
+                        print("File is already organized.")
+
+
+def skipPlugin(path, plugin):
+    if plugin == "ADAndor" and "Andor3" in path:
+        return True
+    return False
 
 
 def registerExtraPlugins(config):
@@ -194,13 +163,21 @@ def registerExtraPlugins(config):
         if "+AD: " in line:
             search = re.search("\+AD: (.*)", line)
             if search is not None:
+                folder = ""
                 split = search.group(1).split(" ")
+                for f in os.listdir(ad_directory):
+                    if split[0] in f:
+                        folder = f
+                        break
+                if folder == "":
+                    print("Could not find a folder for " + split[0] + ".")
+                    continue
                 if len(split) < 2:
-                    plugin_dict[split[0]] = [split[0], "R1-0"]
+                    ver = "R1-0"
                     print("Could not find version for " + split[0] + ". Defaulting to R1-0")
                 else:
-                    plugin_dict[split[0]] = [split[0], split[1]]
-                    print("Registered additional plugin: " + split[0] + " " + split[1])
+                    ver = split[1]
+                register(split[0], ver, folder)
 
 def blacklistPlugins(config):
     print("blacklisting...")
@@ -213,6 +190,12 @@ def blacklistPlugins(config):
                 plugin = search.group(1).strip()
                 print("Ignoring " + plugin)
                 blacklist.append(plugin)
+
+
+def register(plugin, ver, folder):
+    plug2ver[plugin] = ver
+    folder2plugin[folder] = plugin
+    print("Registered " + plugin + " " + ver + " in " + folder)
 
 
 ########################### MAIN ###########################
@@ -351,113 +334,112 @@ while len(matches) != 0 or start is True:
             continue
         skip = False
         ver = ""
-        if match != "ADCore" and match != "areaDetector":
-            if config_path != "":
-                for line in open(config_path):
-                    if "#" in line:
-                        continue
-                    if match.casefold() in line.casefold():
-                        skip = True
-                        verSearch = re.search(match + " : " + "(.*)", line)
-                        if verSearch is not None:
-                            ver = verSearch.group(1)
-                        break
-            if ver != "":
-                plugin_dict[match] = [match, ver]
-                print("Registered " + match + " " + ver)
+        folder = ""
+        response = ""
+        for f in os.listdir(ad_directory):
+            if skipPlugin(f, match):
                 continue
-            response = ""
-            plugin_list.append(match)
-            folderName = ""
-            for folder in os.listdir(ad_directory):
-                if match.casefold() in folder.casefold():
-                    folderName = folder
+            if match in f:
+                folder = f
+                break
+        if folder == "":
+            continue
+        plugin_list.append(match)
+        if config_path != "":
+            for line in open(config_path):
+                if "#" in line:
+                    continue
+                if match.casefold() in line.casefold():
+                    skip = True
+                    verSearch = re.search(match + " : " + "(.*)", line)
+                    if verSearch is not None:
+                        ver = verSearch.group(1)
                     break
-            if folderName != "":
-                release_path = ad_directory + os.sep + folderName + os.sep + "RELEASE.md"
+        if ver != "":
+            register(match, ver, folder)
+            continue
+        release_path = ad_directory + os.sep + folder + os.sep + "RELEASE.md"
+        try:
+            search = False
+            found = False
+            release = open(release_path)
+            for line in release:
+                if ver != "":
+                    found = True
+                    register(match, ver, folder)
+                    break
+                if "Release Notes" in line:
+                    search = True
+                    continue
+                if search is True:
+                    version = re.search("(R\d+-\d+(?:-\d+)*)", line)
+                    if version is not None:
+                        found = True
+                        response = ""
+                        plugin_ver = version.group(1)
+                        if skip is False and not forced:
+                            while response != 'y' and response != 'n':
+                                response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
+                        if response == 'y' or skip is True:
+                            register(match, plugin_ver, folder)
+                        break
+            if found is False and ver == "" and not forced:
+                while response != 'y' and response != 'n':
+                    response = input("Detected " + match + " but could not find version. Register and "
+                               "confirm version? (y/n) ").lower()
+                if response == 'y':
+                    ver = input("Enter version: ")
+                else:
+                    continue
+                register(match, ver, folder)
+        except IOError:
+            release_path = ad_directory + os.sep + match
+            if os.path.isdir(release_path):
+                dirPath = os.path.abspath(release_path) + os.sep + ".git"
                 try:
-                    search = False
-                    release = open(release_path)
-                    found = False
-                    for line in release:
-                        if ver != "":
-                            found = True
-                            plugin_dict[match] = [match, ver]
-                            print("Registered " + match + " " + ver)
-                            break
-                        if "Release Notes" in line:
-                            search = True
+                    command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+                    output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
+                    if verSearch is not None:
+                        ver = verSearch.group(1)
+                        ver = "R" + ver
+                        response = ""
+                        while response != 'y' and response != 'n' and not forced:
+                            response = input("Register " + match + " " + ver + "? (y/n) ")
+                        if response == 'n':
                             continue
-                        if search is True:
-                            version = re.search("(R\d+-\d+(?:-\d+)*)", line)
-                            if version is not None:
-                                found = True
-                                response = ""
-                                plugin_ver = version.group(1)
-                                if skip is False and not forced:
-                                    while response != 'y' and response != 'n':
-                                        response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
-                                if response == 'y' or skip is True:
-                                    plugin_dict[match] = [match, plugin_ver]
-                                    if skip is True:
-                                        print("Registered " + match + " " + plugin_ver)
-                                break
-                    if found is False and ver == "" and not forced:
-                        while response != 'y' and response != 'n':
-                            response = input("Detected " + match + " but could not find version. Register and "
-                                       "confirm version? (y/n) ").lower()
-                        if response == 'y':
-                            ver = input("Enter version: ")
-                        else:
-                            continue
-                        plugin_dict[match] = [match, ver]
-                except IOError:
-                    release_path = ad_directory + os.sep + match
-                    if os.path.isdir(release_path):
-                        dirPath = os.path.abspath(release_path) + os.sep + ".git"
-                        try:
-                            command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
-                            output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                            verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
-                            if verSearch is not None:
-                                ver = verSearch.group(1)
-                                ver = "R" + ver
-                                response = ""
-                                while response != 'y' and response != 'n' and not forced:
-                                    response = input("Register " + match + " " + ver + "? (y/n) ")
-                                if response == 'n':
-                                    continue
-                            else:
-                                raise FileNotFoundError
-                        except FileNotFoundError:
-                            response = ""
-                            output = ""
-                            verSearch = None
-                            print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
-                            while response != 'y' and response != 'n' and not forced:
-                                response = input("Detected " + match + " but could not find version. Register and "
-                                           "confirm version? (y/n) ").lower()
-                            if response == 'y':
-                                ver = input("Enter version: ")
-                            else:
-                                continue
-                        plugin_dict[match] = [match, ver]
+                    else:
+                        raise FileNotFoundError
+                except FileNotFoundError:
+                    response = ""
+                    output = ""
+                    verSearch = None
+                    print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
+                    while response != 'y' and response != 'n' and not forced:
+                        response = input("Detected " + match + " but could not find version. Register and "
+                                   "confirm version? (y/n) ").lower()
+                    if response == 'y':
+                        ver = input("Enter version: ")
+                    else:
+                        continue
+                register(match, ver, folder)
 
 if config_path != "":
     registerExtraPlugins(config_path)
 
 # after comparing user's local directory against the github repo, ask the user if they want to manually register any
 # more plugins into the search
-if error is False and not forced:
+if error is False:
     print("Done detecting plugins.")
     choice = ""
     substr = ""
     query = ""
-    while query != "done":
+    while query != "done" and not forced:
+        folder = ""
         response = ""
         choice = ""
         found = False
-        query = input("Search for a plugin (or enter \"done\" to stop registering plugins): ")
+        query = input('Search for a plugin (or enter "done" to stop registering plugins): ')
         if query.lower() == "done":
             break
         match_list = []
@@ -466,37 +448,67 @@ if error is False and not forced:
                 found = True
                 match_list.append(plugin)
                 if query.casefold() == plugin.casefold():
-                    print(plugin + " found.")
-                    choice = plugin
+                    for f in os.listdir(ad_directory):
+                        if skipPlugin(f, plugin):
+                            continue
+                        if plugin in f:
+                            folder = f
+                            break
+                    if folder == "":
+                        print("No folder found for " + plugin)
+                    else:
+                        ver = input("Enter version for " + plugin + ": ")
+                        register(plugin, ver, folder)
                     break
                 print(plugin)
-        if found is True:
+        if found is True and not forced:
             while choice not in match_list and choice.lower() != "back" and choice.lower() != "reg":
                 choice = input('Enter plugin to register (or "back" to search again or "reg"'
                                ' to register search term): ')
             if choice.lower() == "back":
                 continue
-            if choice.lower() == "reg":
-                choice = query
-                ver = input("Enter version for " + query + ": ")
-                plugin_dict[query] = [query, ver]
-        else:
+            else:
+                if choice.lower() == "reg":
+                    choice = query
+                for f in os.listdir(ad_directory):
+                    if choice in f:
+                        folder = f
+                        break
+                if folder == "":
+                    print("Could not find a folder for " + choice)
+                else:
+                    ver = input("Enter version for " + choice + ": ")
+                    register(choice, ver, folder)
+        elif not forced:
             while response != 'y' and response != 'n':
                 response = input("Plugin " + query + " not found. Register it anyway? (y/n) ").lower()
             if response == 'y':
-                ver = input("Enter version for " + query + ": ")
-                plugin_dict[query] = [query, ver]
+                for f in os.listdir(ad_directory):
+                    if query in f:
+                        folder = f
+                        break
+                if folder == "":
+                    print("Could not find a folder for " + query + ".")
+                else:
+                    ver = input("Enter version for " + query + ": ")
+                    register(query, ver, folder)
 
 # if the github site could not be connected to for some reason, the user must input all their plugins manually
 elif not forced:
     print("Plugins must be entered manually.")
     plugin = input("Enter a plugin to register (or \"done\" to stop adding plugins): ")
     while plugin != "done":
-        version = input("Enter version: ")
-        substr = input("Enter filename substring to search for: ")
-        plugin_dict[substr] = [plugin, version]
-        print(plugin + " version " + version + " added to search, identifying with \"" + substr + "\".")
-        plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
+        folder = ""
+        for f in os.listdir(ad_directory):
+            if plugin in f:
+                folder = f
+                break
+        if folder == "":
+            print("Could not find a folder for " + plugin + ".")
+        else:
+            ver = input("Enter version: ")
+            register(plugin, ver, folder)
+            plugin = input("Enter plugin to search for (or \"done\" to stop adding plugins): ")
 
 # do the organizing
 if css_path != "":
