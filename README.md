@@ -3,6 +3,8 @@
 OPI organizer is a tool made of several component scripts which, with their powers combined (along with CS Studio), uses a local installation of areaDetector and EPICS modules to create an organized directory of OPI files which use macros in their cross-references to enable version control.
 
 ## Requirements ##
+- Python 3 
+  - Tested on Windows 10 running 3.6.5 and Debian 9 running 3.5.3
 - All areaDetector plugins must be in the same folder
 - All EPICS modules must be in the same folder
 - The names of plugin/module folders must contain the name of the github repo they came from in order to be detected
@@ -53,7 +55,7 @@ After creating your config file, simply run the bash script run.sh with the path
 
 ## Using Macros ##
 After running the script, all references between OPIs in different folders are replaced by macros which point to whichever 
-version of the target plugin was installed when the script was run. The value of the macros are **paths from the same level as the 
+version of the target plugin was installed when the script was run. The values of the macros are **paths from the same level as the 
 parent EPICS and AD folders.** These macros have a uniform structure across all areaDetector plugins and EPICS modules, so they can be
 defined by a parent OPI for version control. For example, to use Andor3 R2-1 OPI screens, simply define the ```pathAndor3``` macro as 
 ```
