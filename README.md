@@ -3,6 +3,8 @@
 OPI organizer is a tool made of several component scripts which, with their powers combined (along with CS Studio), uses a local installation of areaDetector and EPICS modules to create an organized directory of OPI files which use macros in their cross-references to enable version control.
 
 ## Requirements ##
+- Python 3 
+  - Tested on Windows 10 running 3.6.5 and Debian 9 running 3.5.3
 - All areaDetector plugins must be in the same folder
 - All EPICS modules must be in the same folder
 - The names of plugin/module folders must contain the name of the github repo they came from in order to be detected
@@ -49,5 +51,40 @@ The config file specifies:
 
 After creating your config file, simply run the bash script run.sh with the path to the config file as an argument. The script will attempt to identfiy which modules and plugins are present, and attempt to find their version. If the plugin or module is not present in the whitelist, it will ask if you want to register it. Similarly, it will ask for a version if it can not find one. After all plugins/modules are registered, it identifies & converts ADL files using CS Studio, and moves the resulting OPI files into the new structure. It will then fix all the cross-references in the OPIs, replacing them with a macro specific to each plugin/module which can be used to specify a version once several versions are installed. 
 
-**Use the flag -f [path/to/config] to bypass all prompts; any plugins that are not on the whitelist OR whose version can not be identified WILL NOT be reigstered.**
+**Use the flag -f [path/to/config] to bypass all prompts; any plugins that are not on the whitelist OR whose version can not be identified will NOT be reigstered.**
 
+## Using Macros ##
+After running the script, all references between OPIs in different folders are replaced by macros which point to whichever 
+version of the target plugin was installed when the script was run. The values of the macros are **paths from the same level as the 
+parent EPICS and AD folders.** These macros have a uniform structure across all areaDetector plugins and EPICS modules, so they can be
+defined by a parent OPI for version control. For example, to use Andor3 R2-1 OPI screens, simply define the ```pathAndor3``` macro as 
+```
+<Parent AD folder name>/<AD version>/Andor3/R2-1
+```
+in the main parent OPI screen. Although these will all be defined by default in each individual OPI that needs them, it is reccommended 
+to define them in the main parent screen as well so that version control is easy to track. (Parent macros will override children macros)
+
+**This is the only change the script makes to these OPIs.** Examples from Andor.opi (R2-8):
+```
+<macros>
+    <include_parent_macros>true</include_parent_macros>
+</macros>
+```
+is changed to...
+```
+<macros>
+  <pathADCore>ADet\R3-3\ADCore\R3-3-2</pathADCore>
+  <include_parent_macros>true</include_parent_macros>
+</macros>
+```
+
+<br />
+<br />
+
+```
+<path>NDFile.opi</path>
+```
+is changed to...
+```
+<path>..\..\..\..\$(pathADCore)\NDFile.opi</path>
+```
