@@ -44,7 +44,7 @@ The config file specifies:
 - Location of target folder for areaDetector plugin OPIs
 - Location of EPICS modules
 - Location of target folder for EPICS modules OPIs
-- Location of CS Studio executable
+- Path to CS Studio executable
 - A whitelist of plugins/modules to register in the organization, with the option to indicate their version (otherwise, the script attempts to identify it with git tags or release files)
 - A blacklist of plugins/modules to ignore
 - Additional plugins/modules that are obtained from somewhere other than github
@@ -54,15 +54,15 @@ After creating your config file, simply run the bash script run.sh with the path
 **Use the flag -f [path/to/config] to bypass all prompts; any plugins that are not on the whitelist OR whose version can not be identified will NOT be reigstered.**
 
 ## Using Macros ##
-After running the script, all references between OPIs in different folders are replaced by macros which point to whichever 
-version of the target plugin was installed when the script was run. The values of the macros are **paths from the same level as the 
-parent EPICS and AD folders.** These macros have a uniform structure across all areaDetector plugins and EPICS modules, so they can be
-defined by a parent OPI for version control. For example, to use Andor3 R2-1 OPI screens, simply define the ```pathAndor3``` macro as 
+After running the script, all references between OPIs in different folders are replaced by macros which point to whichever version of the target plugin was installed when the script was run. The values of the macros are **paths from the same level as the parent EPICS and AD folders.** These macros have a uniform structure across all areaDetector plugins and EPICS modules, so they can be defined by a parent OPI for version control. For example, to use ADCore R3-2 OPI screens, simply define the ```pathADCore``` macro as 
 ```
-<Parent AD folder name>/<AD version>/Andor3/R2-1
+<Parent AD folder name>/<AD version>/ADCore/R3-2
+
+eg.
+
+ADet/R3-3-2/ADCore/R3-2
 ```
-in the main parent OPI screen. Although these will all be defined by default in each individual OPI that needs them, it is reccommended 
-to define them in the main parent screen as well so that version control is easy to track. (Parent macros will override children macros)
+in the main parent OPI screen. Although these will all be defined by default in each individual OPI that needs them, it is reccommended to define them in the main parent screen as well so that version control is easy to track. (Parent macros will override children macros)
 
 **This is the only change the script makes to these OPIs.** Examples from Andor.opi (R2-8):
 ```
