@@ -18,7 +18,7 @@ AD_DIRECTORY : /home/mrolland/MRolland/support/areaDetector-master
 
 # used by convert_and_organize_ad.py and update_references.py
     # AD_OPI_DIRECTORY : C:\Users\mikes\Documents\OPIs\ADet\R3-3
-AD_OPI_DIRECTORY : /home/mrolland/MRolland/OPIs/ADet/R3-3
+AD_OPI_DIRECTORY : /home/mrolland/MRolland/OPIs/ADet/master
 
 # All plugins listed below will be searched for automatically, bypassing the confirmation prompt. Blacklisted
 # plugins will be ignored.
@@ -104,6 +104,7 @@ BEGIN_EPICS
 
     +EPICS: seq master
     +EPICS: galil master
+    +EPICS: pmac master
     asyn : master
     motor : master
     calc : master
@@ -137,6 +138,7 @@ BEGIN_EPICS
     quadEM : master
     tpmac : master
     pcas : master
+    labJack : master
     ip330 : master
     dac128V : master
     ipUnidig : master
