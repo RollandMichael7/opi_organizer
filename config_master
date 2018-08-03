@@ -103,7 +103,7 @@ END_AD
 BEGIN_EPICS
 
     +EPICS: seq master
-    +EPICS: galil master
+    +EPICS: Galil master
     +EPICS: pmac master
     asyn : master
     motor : master
@@ -138,7 +138,7 @@ BEGIN_EPICS
     quadEM : master
     tpmac : master
     pcas : master
-    labJack : master
+    LabJack : master
     ip330 : master
     dac128V : master
     ipUnidig : master
