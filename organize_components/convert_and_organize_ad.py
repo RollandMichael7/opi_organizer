@@ -384,7 +384,7 @@ while len(matches) != 0 or startLoop is True:
             ver = verSearch.group(1)
             ver = "R" + ver
             response = ""
-            while response != 'y' and response != 'n' and not forced:
+            while response != 'y' and response != 'n' and not forced and not whitelisted:
                 response = input("Register " + match + " " + ver + "? (y/n) ")
             if response == 'y' or whitelisted is True:
                 register(match, ver, folder)
