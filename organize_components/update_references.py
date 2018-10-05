@@ -2,9 +2,8 @@
 # they do not break in the new directory structure; uses macros so that the version of a referenced plugin can be
 # chosen at runtime.
 # author: Michael Rolland
-# version: 2018-07-03
+# version: 2018-10-05
 
-import glob
 import os
 import re
 import fileinput
@@ -35,10 +34,7 @@ def cross_reference(opi_dir):
         for file in files:
             if file.endswith(".opi"):
                 macro_dict = {
-                    # plugin name : [plugin version, (areaDetector OR epics-modules), isADet, isLinkToEpics]
-                    # isADet: True iff the plugin being updated is part of an AreaDetector plugin
-                    # isLinkToEpics: True iff the plugin being updated is part of an AreaDetector plugin
-                    #                AND the OPI being linked to is part of an EPICS module
+                    # plugin name : [plugin version, (areaDetector OR epics-modules)]
                 }
                 folders = os.path.join(root, file)
                 folders = folders.split(os.sep)
@@ -51,7 +47,6 @@ def cross_reference(opi_dir):
                         plugin = ""
                         ver = ""
                         pluginType = ""
-                        foundIn = ""
                         if "<opi_file>" in line:
                             pathTag = "opi_file"
                         else:
@@ -107,7 +102,7 @@ def cross_reference(opi_dir):
                                                 if foundIn == ad_dir:
                                                     pluginType = str(folders[len(folders) - 5]) + os.sep + str(folders[len(folders) - 4])
                                                 break
-                                    if lookIn == second and not done or (lookIn == first and first == second and not not done):
+                                    if lookIn == second and not done or (lookIn == first and first == second and not done):
                                         break
                                     if done:
                                         break
@@ -121,14 +116,6 @@ def cross_reference(opi_dir):
                                         line = line + ".." + os.sep
                                     line = line + "$(path" + plugin[:1].upper() + plugin[1:] + ")" + os.sep + path + "</" + pathTag + ">" + after + "\n"
                                     if plugin not in macro_dict.keys():
-                                        # if opi_dir == ad_dir:
-                                        #     isADet = True
-                                        # else:
-                                        #     isADet = False
-                                        # if isADet and foundIn == epics_dir:
-                                        #     isLinkToEpics = True
-                                        # else:
-                                        #     isLinkToEpics = False
                                         macro_dict[plugin] = [ver, pluginType]
                                     sys.stderr.write("converted to: " + line)
                                 else:
