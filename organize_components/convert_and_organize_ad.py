@@ -408,17 +408,18 @@ while len(matches) != 0 or startLoop is True:
                     if version is not None:
                         found = True
                         response = ""
-                        plugin_ver = version.group(1)
-                        if whitelisted is False and not forced:
+                        ver = version.group(1)
+                        if not whitelisted and not forced:
                             while response != 'y' and response != 'n':
-                                response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
-                        if response == 'y' or whitelisted is True:
-                            register(match, plugin_ver, folder)
+                                response = input("Register " + match + " version " + ver + "? (y/n) ").lower()
+                        if response == 'y' or whitelisted:
+                            register(match, ver, folder)
                         break
         except FileNotFoundError:
             print()
-        if ver != "":
+        if ver != "" or forced:
             continue
+        response = ""
         while response != 'y' and response != 'n':
             response = input("Detected " + match + " but could not find version. Register and "
                                                    "confirm version? (y/n) ").lower()
