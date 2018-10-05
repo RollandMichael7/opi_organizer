@@ -3,7 +3,7 @@
 # This will break any references from an OPI of one plugin to an OPI of another (such as any reference to ADCore),
 # which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.07.23
+# version: 2018.10.05
 
 
 import os
@@ -349,7 +349,7 @@ while len(matches) != 0 or startLoop is True:
     for match in matches:
         if match in blacklist:
             continue
-        skip = False
+        whitelisted = False
         ver = ""
         response = ""
         folder = findFolder(match)
@@ -367,7 +367,7 @@ while len(matches) != 0 or startLoop is True:
                     break
                 if start:
                     if match.casefold() in line.casefold():
-                        skip = True
+                        whitelisted = True
                         verSearch = re.search(match + " : " + "(.*)", line)
                         if verSearch is not None:
                             ver = verSearch.group(1)
@@ -375,16 +375,31 @@ while len(matches) != 0 or startLoop is True:
         if ver != "":
             register(match, ver, folder)
             continue
+        release_path = ad_directory + os.sep + folder
+        dirPath = os.path.abspath(release_path) + os.sep + ".git"
+        command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
+        output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+        verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
+        if verSearch is not None:
+            ver = verSearch.group(1)
+            ver = "R" + ver
+            response = ""
+            while response != 'y' and response != 'n' and not forced:
+                response = input("Register " + match + " " + ver + "? (y/n) ")
+            if response == 'y' or whitelisted is True:
+                register(match, ver, folder)
+            continue
+        else:
+            response = ""
+            output = ""
+            verSearch = None
+            print("Could not get version from git command: git --git-dir=" + dirPath + " describe --tags")
         release_path = ad_directory + os.sep + folder + os.sep + "RELEASE.md"
         try:
             search = False
             found = False
             release = open(release_path)
             for line in release:
-                if ver != "":
-                    found = True
-                    register(match, ver, folder)
-                    break
                 if "Release Notes" in line:
                     search = True
                     continue
@@ -394,52 +409,23 @@ while len(matches) != 0 or startLoop is True:
                         found = True
                         response = ""
                         plugin_ver = version.group(1)
-                        if skip is False and not forced:
+                        if whitelisted is False and not forced:
                             while response != 'y' and response != 'n':
                                 response = input("Register " + match + " version " + plugin_ver + "? (y/n) ").lower()
-                        if response == 'y' or skip is True:
+                        if response == 'y' or whitelisted is True:
                             register(match, plugin_ver, folder)
                         break
-            if found is False and ver == "" and not forced:
-                while response != 'y' and response != 'n':
-                    response = input("Detected " + match + " but could not find version. Register and "
-                               "confirm version? (y/n) ").lower()
-                if response == 'y':
-                    ver = input("Enter version: ")
-                else:
-                    continue
-                register(match, ver, folder)
-        except IOError:
-            release_path = ad_directory + os.sep + match
-            if os.path.isdir(release_path):
-                dirPath = os.path.abspath(release_path) + os.sep + ".git"
-                try:
-                    command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
-                    output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
-                    if verSearch is not None:
-                        ver = verSearch.group(1)
-                        ver = "R" + ver
-                        response = ""
-                        while response != 'y' and response != 'n' and not forced:
-                            response = input("Register " + match + " " + ver + "? (y/n) ")
-                        if response == 'n':
-                            continue
-                    else:
-                        raise FileNotFoundError
-                except FileNotFoundError:
-                    response = ""
-                    output = ""
-                    verSearch = None
-                    print("ERROR on git command: git --git-dir=" + dirPath + " describe --tags")
-                    while response != 'y' and response != 'n' and not forced:
-                        response = input("Detected " + match + " but could not find version. Register and "
-                                   "confirm version? (y/n) ").lower()
-                    if response == 'y':
-                        ver = input("Enter version: ")
-                    else:
-                        continue
-                register(match, ver, folder)
+        except FileNotFoundError:
+            print()
+        if ver != "":
+            continue
+        while response != 'y' and response != 'n':
+            response = input("Detected " + match + " but could not find version. Register and "
+                                                   "confirm version? (y/n) ").lower()
+        if response == 'n':
+            continue
+        ver = input("Enter version: ")
+        register(match, ver, folder)
 
 if config_path != "":
     registerExtraPlugins(config_path)
