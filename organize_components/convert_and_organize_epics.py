@@ -2,7 +2,7 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.07.23
+# version: 2018.10.09
 
 
 import os
@@ -369,7 +369,7 @@ while len(matches) != 0 or startLoop is True:
                 try:
                     command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
                     output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    verSearch = re.search("(\d+\.\d+(?:\.\d+)*)", output)
+                    verSearch = re.search("(\d+\.\d+(?:\.\d+)?)", output)
                 except FileNotFoundError:
                     output = ""
                     verSearch = None
@@ -388,7 +388,7 @@ while len(matches) != 0 or startLoop is True:
                         register(match, ver, folder)
                 else:
                     if output != "":
-                        verSearch = re.search("(\d+-\d+(?:-\d+)*)", output)
+                        verSearch = re.search("(\d+-\d+(?:-\d+)?)", output)
                     if verSearch is not None:
                         ver = verSearch.group(1)
                         ver = "R" + ver
