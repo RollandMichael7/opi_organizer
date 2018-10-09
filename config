@@ -149,5 +149,6 @@ BEGIN_EPICS
     delaygen
     Yokogawa_DAS : R1-0
     dxpSITORO
+    LabJack : R1-0
 
 END_EPICS
