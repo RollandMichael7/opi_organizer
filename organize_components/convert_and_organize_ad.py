@@ -379,7 +379,7 @@ while len(matches) != 0 or startLoop is True:
         dirPath = os.path.abspath(release_path) + os.sep + ".git"
         command = ["git", "--git-dir=" + dirPath, "describe", "--tags"]
         output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
-        verSearch = re.search("(\d+-\d+(?:-\d+)?)", output)
+        verSearch = re.search("(\d+-\d+)", output)
         if verSearch is not None:
             ver = verSearch.group(1)
             ver = "R" + ver
