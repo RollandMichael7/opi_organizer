@@ -166,6 +166,16 @@ class Ui_MainWindow(object):
 
         
     def selectConfig(self):
+        self.config_line.setText("")
+        self.ad_line.setText("")
+        self.ad_opi_line.setText("")
+        self.epics_line.setText("")
+        self.epics_opi_line.setText("")
+        self.css_line.setText("")
+        self.ad_text.setPlainText("")
+        self.epics_text.setPlainText("")
+        self.clearout()
+        self.run_button.setEnabled(False)
         config = QFileDialog.getOpenFileName()[0]
         if config != '':
             self.config_line.setText(config)
@@ -211,12 +221,14 @@ class Ui_MainWindow(object):
                     foundCSS = True
                     self.css_line.setText(match)
                     continue
+        # only allow user to run scripts if they have given all the required input
         if foundAD and foundOPI_AD and foundEPICS and foundOPI_EPICS and foundCSS:
+            print("Ready to run.")
             self.run_button.setEnabled(True)
+        config.seek(0)
         # search for AD modules
         start = False
         for line in config:
-            print(line)
             if '#' in line or line.strip() == "":
                 continue
             if 'BEGIN_AD' in line:
@@ -227,10 +239,10 @@ class Ui_MainWindow(object):
             if start is False:
                 continue
             self.ad_text.setPlainText(self.ad_text.toPlainText() + line)
+        config.seek(0)
         # seach for EPICS modules
         start = False
         for line in config:
-            print(line)
             if '#' in line or line.strip() == "":
                 continue
             if 'BEGIN_EPICS' in line:
