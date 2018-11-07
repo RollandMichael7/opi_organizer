@@ -1,5 +1,4 @@
 # Graphic User Interface #
-# WARNING: This script is currently only developed and tested on Linux Debian #
 
 For users who prefer a GUI over a command line, this PyQt5 implementation of OPI Organizer
 presents a user-friendly visual interface. 
