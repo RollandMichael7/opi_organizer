@@ -161,8 +161,13 @@ class Ui_MainWindow(object):
         self.clearout()
         print("Running...\n")
         os.chdir('..')
-        self.process.start('bash run.sh -f ' + self.config_line.text())
-        #print("done")
+        platform = sys.platform
+        if 'linux' in platform.lower():
+            self.process.start('bash run.sh -f ' + self.config_line.text())
+        elif 'win' in platform.lower():
+            path = os.path.join(os.getcwd(), "run_windows.bat")
+            self.process.start(path + ' -f ' + self.config_line.text())
+        print("done")
 
         
     def selectConfig(self):
