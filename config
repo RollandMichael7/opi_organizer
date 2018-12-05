@@ -86,12 +86,18 @@ BEGIN_AD
     ADmarCCD
     ADnED : R1-0
     NDDriverStdArrays
-    aravisGigE
     ffmpegServer
     ffmpegViewer : R1-0
     firewireDCAM : R1-0
     pvaDriver
     ADSpinnaker
+    ADGenICam
+    ADVimba
+    # NOTE: The OPIs included in ADAravis (aravisCamera, aravisMore, aravisTop)
+    # are also included in aravisGigE
+    # ADAravis
+    aravisGigE
+    ADTimePix
 
 END_AD
 

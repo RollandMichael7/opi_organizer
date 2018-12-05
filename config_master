@@ -88,12 +88,18 @@ BEGIN_AD
     ADmarCCD : master
     ADnED : master
     NDDriverStdArrays : master
-    aravisGigE : master
     ffmpegServer : master
     ffmpegViewer : master
     firewireDCAM : master
     pvaDriver : master
     ADSpinnaker : master
+    ADGenICam : master
+    ADVimba : master
+    # NOTE: The OPIs included in ADAravis (aravisCamera, aravisMore, aravisTop)
+    # are also included in aravisGigE
+    # ADAravis : master
+    aravisGigE : master
+    ADTimePix : master
 
 END_AD
 
