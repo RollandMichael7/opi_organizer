@@ -333,7 +333,8 @@ while len(matches) != 0 or startLoop is True:
         print("ERROR: Can not access github.")
         error = True
         break
-    matches = re.findall("a href=\"/epics-modules/(.*)\" itemprop", repo)
+    # TODO: find better way of identifying module names
+    matches = re.findall("href=\"/epics-modules/(.*)\"", repo)
     for match in matches:
         if match in blacklist:
             continue
