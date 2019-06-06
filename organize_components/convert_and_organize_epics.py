@@ -2,7 +2,7 @@
 # into OPIs and organize them into a hierarchical directory that groups by plugin and version.
 # This will break any references from an OPI of one plugin to an OPI of another, which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.10.09
+# version: 2019.06.06
 
 
 import os
@@ -334,7 +334,7 @@ while len(matches) != 0 or startLoop is True:
         error = True
         break
     # TODO: find better way of identifying module names
-    matches = re.findall("href=\"/epics-modules/(.*)\"", repo)
+    matches = re.findall("href=\"/epics-modules/(.*?)\"", repo)
     for match in matches:
         if match in blacklist:
             continue

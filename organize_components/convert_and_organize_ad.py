@@ -3,7 +3,7 @@
 # This will break any references from an OPI of one plugin to an OPI of another (such as any reference to ADCore),
 # which can be fixed with update_references.py
 # author: Michael Rolland
-# version: 2018.12.05
+# version: 2019.06.06
 
 
 import os
@@ -341,7 +341,7 @@ while len(matches) != 0 or startLoop is True:
         error = True
         break
     # TODO: find better way of identifying module names
-    matches = re.findall("href=\"/areaDetector/(.*)\"", repo)
+    matches = re.findall("href=\"/areaDetector/(.*?)\"", repo)
     for match in matches:
         if match in blacklist:
             continue
