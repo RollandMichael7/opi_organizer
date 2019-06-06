@@ -299,24 +299,19 @@ if not foundAD and not forced:
     while not os.path.isdir(ad_directory):
         ad_directory = input("Enter path to AreaDetector directory containing plugins: ")
 
-core_path = ad_directory + os.sep + "ADCore" + os.sep + "RELEASE.md"
-try:
-    search = False
-    core = open(core_path)
-    for line in core:
-        if "Release Notes" in line:
-            search = True
-            continue
-        if search is True:
-            core_ver = re.search("(R\d+-\d+(?:-\d+)*)", line)
-            if core_ver is not None:
-                ADCore_ver = core_ver.group(1)
-                print("Detected ADCore " + ADCore_ver)
-                break
-except IOError:
-    if not forced:
-        print("Could not detect ADCore version.")
-        ADCore_ver = input("Enter ADCore version: ")
+# determine ADCore version
+core_path = ad_directory + os.sep + "ADCore" + os.sep + ".git"
+command = ["git", "--git-dir=" + core_path, "describe", "--tags"]
+output = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+verSearch = re.search("(R\d+-\d+)", output)
+if verSearch is not None:
+    ADCore_ver = verSearch.group(1)
+    print("Detected ADCore version " + ADCore_ver)
+else:
+    print("Could not detect ADCore version.")
+    if forced:
+        exit(0)
+    ADCore_ver = input("Enter ADCore version: ")
 
 if not foundCSS and not forced:
     # ask user if they want to use the CS Studio adl2boy feature, get path to executable if so
