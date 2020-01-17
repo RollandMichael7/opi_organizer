@@ -1,5 +1,11 @@
 # opi_organizer #
 
+Author: Michael Rolland  
+Corresponding Author: Kazimierz Gofron  
+Created: June 19, 2018  
+Last Updated: June 6, 2019   
+Copyright (c): 2018-2019 Brookhaven National Laboratory  
+
 OPI organizer is a tool made of several component scripts which, with their powers combined (along with CS Studio), uses a local installation of areaDetector and EPICS modules to create an organized directory of OPI files which use macros in their cross-references to enable version control.
 
 ## Requirements ##
